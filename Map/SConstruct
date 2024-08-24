@@ -1,0 +1,2 @@
+cpp = Environment(CCFLAGS=['-Wall'])
+parsers = SharedLibrary("libTile",["Tile.cpp"])
