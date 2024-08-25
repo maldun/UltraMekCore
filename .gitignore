@@ -1,4 +1,7 @@
 *.o
 *.os
 *~
-unittest
+unittests
+*.dblite
+*.so
+

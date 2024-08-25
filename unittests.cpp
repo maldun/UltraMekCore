@@ -1,9 +1,10 @@
 #include "unittests.hpp"
 #include "Map/Tile.hpp"
+#include "Map/MMap.hpp"
 
 int main(int argc, char *argv[])
 {
-
-    int tile_res = tile_tests();
+    tile_tests();
+    mmap_tests();
     return 0;
 } 

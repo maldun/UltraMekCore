@@ -1,3 +1,5 @@
 cpp = Environment(CCFLAGS=['-Wall'],LIBPATH=['Map'])
 #SConscript(['Map/Sconscript'])
-unittests = cpp.Program("unittests",["unittests.cpp","Map/Tile.cpp"],include=["Map/Tile.hpp"])
+cfiles = ["unittests.cpp","Map/Tile.cpp","Map/MMap.cpp","Etc/helpers.cpp"]
+hfiles = [f.replace(".cpp",".hpp") for f in cfiles]
+unittests = cpp.Program("unittests",cfiles,include=hfiles)

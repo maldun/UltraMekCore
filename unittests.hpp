@@ -5,6 +5,7 @@
 #include<iostream>
 #include<string>
 #include "Map/Tile.hpp"
+#include "Map/MMap.hpp"
 
 int main(int , char**);
 
