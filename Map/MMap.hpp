@@ -20,6 +20,8 @@ class MMap
       vector<vector<Tile>> map_data;
       MMap(string);
       MMap(int,int,vector<vector<Tile>>);
+      ~MMap();
+      Tile convertMMLine2Tile(string,int,int);
       
 };
 

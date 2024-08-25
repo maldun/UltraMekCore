@@ -15,10 +15,9 @@ Tile::Tile()
     height = -100;
 }
 
-Tile::Tile(string line)
+Tile::~Tile()
 {
-    string tokens = tokenizer(line,' ');
-    
+   properties.erase(properties.begin(),properties.end());   
 }
 
 int test_empty_tile_creation()

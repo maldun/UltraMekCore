@@ -2,6 +2,7 @@
 #include "MMap.hpp"
 
 const string SIZE_KEY = "size";  
+const string HEX_KEY = "hex";  
 
 
 
@@ -19,6 +20,9 @@ MMap::MMap(string filename)
     // String to store each line of the file. 
     string line;
     vector<string> tokens;
+    int pos_x;
+    int pos_y;
+    unsigned int counter = 0;
   
     if (file.is_open()) { 
         // Read each line from the file and store it in the 
@@ -31,9 +35,20 @@ MMap::MMap(string filename)
                 dim_x = stoi(tokens[1]);
                 dim_y = stoi(tokens[2]);
                 Tile emptyt = Tile();
-                map_data = vector<vector<Tile>>(dim_y,vector<Tile>(dim_x,emptyt));
+                map_data = vector<vector<Tile>>(dim_x,vector<Tile>(dim_y,emptyt));
             }
-            cout << line << endl; 
+            
+            size_t foundh = line.rfind(HEX_KEY);
+            if(foundh != string::npos)
+            {
+                pos_x = counter%dim_x;
+                pos_y = counter/dim_x;
+                map_data[pos_x][pos_y] = convertMMLine2Tile(line,pos_x,pos_y);
+                
+                counter++;
+            }
+            //cout << line << endl; 
+            
         } 
   
         // Close the file stream once all lines have been 
@@ -44,6 +59,47 @@ MMap::MMap(string filename)
     { 
            throw runtime_error("Error! File not fond!");
     } 
+}
+
+Tile MMap::convertMMLine2Tile(string line,int pos_x,int pos_y)
+{
+    vector<string> spair;
+    vector<string> tokens = tokenizer(line,' ');
+    
+    int h = stoi(tokens[2]);
+    
+    map<string,int>new_map;
+    if(tokens[3].size() > 2)
+    {
+        string token = tokens[3];
+        token.pop_back();
+        token.erase(token.begin());
+        vector<string> sub_tokens = tokenizer(token,';');
+        for(long unsigned int i=0;i<sub_tokens.size();i++)
+        {
+            spair = tokenizer(sub_tokens[i],':');
+            if(spair.size() > 1)
+            {
+              
+              pair<string,int> temp_pair(spair[0],stoi(spair[1]));
+              new_map.insert(temp_pair);
+            }
+            else
+            {
+              if(spair[0].size() > 0)
+              {
+                 pair<string,int> temp_pair(sub_tokens[0],-1);
+                 new_map.insert(temp_pair);
+             }
+          }
+        }
+    }
+    return Tile(pos_x,pos_y,h,new_map);
+}
+
+MMap::~MMap()
+{
+  vector<vector<Tile>>().swap(map_data);
 }
 
 int test_mmap_creation()
@@ -66,7 +122,8 @@ int test_mmap_creation_from_file()
 {
   string filename = "Map/samples/test.board";
   MMap mm = MMap(filename);
-  if(!(mm.dim_x == 16) || !(mm.dim_y == 17))
+  if(!(mm.dim_x == 16) or !(mm.dim_y == 17) or (mm.map_data[13][0].height != 0) or (mm.map_data[13][0].properties["woods"]!=2) 
+      or (mm.map_data[15][0].properties["water"]!=1))
    {
      cout << "MMap creation from file failed!" << endl;
      return 1;

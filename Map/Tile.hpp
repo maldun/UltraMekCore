@@ -17,8 +17,9 @@ class Tile
 	   map<string,int> properties;
 	   string notes;
 	   Tile(int,int,int,map<string,int>);
-	   Tile(string);
+	   Tile(string,int,int);
 	   Tile(); // create empty tile as place holder
+	   ~Tile();
 };
 
 
