@@ -123,7 +123,7 @@ int test_mmap_creation_from_file()
   string filename = "Map/samples/test.board";
   MMap mm = MMap(filename);
   if(!(mm.dim_x == 16) or !(mm.dim_y == 17) or (mm.map_data[13][0].height != 0) or (mm.map_data[13][0].properties["woods"]!=2) 
-      or (mm.map_data[15][0].properties["water"]!=1))
+      or (mm.map_data[15][0].properties["water"]!=1) or  (mm.map_data[15][16].properties["foliage_elev"]!=2))
    {
      cout << "MMap creation from file failed!" << endl;
      return 1;
