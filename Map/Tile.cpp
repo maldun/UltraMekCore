@@ -42,9 +42,9 @@ int test_tile_creation()
    int y = 2;
    int h = 3;
    vector<string> props(1,"swamp:1"); 
-   string typestr = "";
+   string typestr = "snow";
    Tile t = Tile(x,y,h,props,typestr);
-   if(!(t.height == h) || !(t.properties == props) || !(t.pos_x == x) || !(t.pos_y == y) || (t.typestring != "")) 
+   if(!(t.height == h) || !(t.properties == props) || !(t.pos_x == x) || !(t.pos_y == y) || (t.typestring != "snow")) 
    {
      cout << "Tile creation failed!" << endl;
      return 1;

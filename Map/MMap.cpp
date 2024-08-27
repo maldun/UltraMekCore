@@ -71,17 +71,15 @@ Tile MMap::convertMMLine2Tile(string line,int pos_x,int pos_y)
     vector<string> props;
     if(tokens[3].size() > 2)
     {
-        string token = tokens[3];
-        token.pop_back();
-        token.erase(token.begin());
+        string token = trim(tokens[3]);
+        token = remove_closure(token);
         vector<string> sub_tokens = tokenizer(token,';');
         for(long unsigned int i=0;i<sub_tokens.size();i++)
         {
            props.push_back(sub_tokens[i]);   
         }
-        typestr = tokens[4];
-          
     }
+    typestr = remove_closure(trim(tokens[4]));
     return Tile(pos_x,pos_y,h,props,typestr);
 }
 
@@ -121,6 +119,7 @@ int test_mmap_creation_from_file()
    if(!(mm.dim_x == 16) or !(mm.dim_y == 17) or (mm.map_data[15][16].typestring !="snow"))
    {
      cout << "MMap creation from snow file failed!" << endl;
+     return 2;
    }
   return 0;
 }
