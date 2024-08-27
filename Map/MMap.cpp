@@ -67,8 +67,8 @@ Tile MMap::convertMMLine2Tile(string line,int pos_x,int pos_y)
     vector<string> tokens = tokenizer(line,' ');
     
     int h = stoi(tokens[2]);
-    
-    map<string,int>new_map;
+    string typestr = "";
+    vector<string> props;
     if(tokens[3].size() > 2)
     {
         string token = tokens[3];
@@ -77,24 +77,12 @@ Tile MMap::convertMMLine2Tile(string line,int pos_x,int pos_y)
         vector<string> sub_tokens = tokenizer(token,';');
         for(long unsigned int i=0;i<sub_tokens.size();i++)
         {
-            spair = tokenizer(sub_tokens[i],':');
-            if(spair.size() > 1)
-            {
-              
-              pair<string,int> temp_pair(spair[0],stoi(spair[1]));
-              new_map.insert(temp_pair);
-            }
-            else
-            {
-              if(spair[0].size() > 0)
-              {
-                 pair<string,int> temp_pair(sub_tokens[0],-1);
-                 new_map.insert(temp_pair);
-             }
-          }
+           props.push_back(sub_tokens[i]);   
         }
+        typestr = tokens[4];
+          
     }
-    return Tile(pos_x,pos_y,h,new_map);
+    return Tile(pos_x,pos_y,h,props,typestr);
 }
 
 MMap::~MMap()
@@ -122,11 +110,17 @@ int test_mmap_creation_from_file()
 {
   string filename = "Map/samples/test.board";
   MMap mm = MMap(filename);
-  if(!(mm.dim_x == 16) or !(mm.dim_y == 17) or (mm.map_data[13][0].height != 0) or (mm.map_data[13][0].properties["woods"]!=2) 
-      or (mm.map_data[15][0].properties["water"]!=1) or  (mm.map_data[15][16].properties["foliage_elev"]!=2))
+  if(!(mm.dim_x == 16) or !(mm.dim_y == 17) or (mm.map_data[13][0].height != 0) or (mm.map_data[13][0].properties[0]!="woods:2") 
+      or (mm.map_data[15][0].properties[0]!="water:1") or  (mm.map_data[15][16].properties[1] !="foliage_elev:2"))
    {
      cout << "MMap creation from file failed!" << endl;
      return 1;
+   }
+   filename = "Map/samples/snow.board";
+   mm = MMap(filename);
+   if(!(mm.dim_x == 16) or !(mm.dim_y == 17) or (mm.map_data[15][16].typestring !="snow"))
+   {
+     cout << "MMap creation from snow file failed!" << endl;
    }
   return 0;
 }

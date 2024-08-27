@@ -1,11 +1,12 @@
 #include "Tile.hpp" 
 
-Tile::Tile(int x, int y, int h,map<string,int> props)
+Tile::Tile(int x, int y, int h,vector<string> props,string typestr)
 {
     pos_x = x;
     pos_y = y;
     height = h;
     properties = props;
+    typestring = typestr;
 }
 
 Tile::Tile()
@@ -13,6 +14,7 @@ Tile::Tile()
     pos_x = -1;
     pos_y = -1;
     height = -100;
+    typestring = "";
 }
 
 Tile::~Tile()
@@ -24,7 +26,7 @@ int test_empty_tile_creation()
 {
    
    Tile t = Tile();
-   if((t.height != -100) || !(t.properties.empty()) || (t.pos_x != -1) || (t.pos_y != -1))
+   if((t.height != -100) || !(t.properties.empty()) || (t.pos_x != -1) || (t.pos_y != -1) || (t.typestring != ""))
    {
      cout << "Empty Tile creation failed!" << endl;
      return 1;
@@ -39,9 +41,10 @@ int test_tile_creation()
    int x = 1;
    int y = 2;
    int h = 3;
-   map<string, int> props = {{"swamp",1}};   
-   Tile t = Tile(x,y,h,props);
-   if(!(t.height == h) || !(t.properties == props) || !(t.pos_x == x) || !(t.pos_y == y))
+   vector<string> props(1,"swamp:1"); 
+   string typestr = "";
+   Tile t = Tile(x,y,h,props,typestr);
+   if(!(t.height == h) || !(t.properties == props) || !(t.pos_x == x) || !(t.pos_y == y) || (t.typestring != "")) 
    {
      cout << "Tile creation failed!" << endl;
      return 1;

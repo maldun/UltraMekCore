@@ -14,9 +14,9 @@ class Tile
 	   int pos_x;
 	   int pos_y;
 	   int height;
-	   map<string,int> properties;
-	   string notes;
-	   Tile(int,int,int,map<string,int>);
+	   vector<string> properties;
+	   string typestring;
+	   Tile(int,int,int,vector<string>,string);
 	   Tile(string,int,int);
 	   Tile(); // create empty tile as place holder
 	   ~Tile();
