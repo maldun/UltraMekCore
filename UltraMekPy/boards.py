@@ -91,12 +91,13 @@ class Board:
         dic = {"size_x": self.size_x,"size_y":self.size_y}
         llist = [[tile.to_dict() for tile in row] for row in self.tiles]
         dic["tiles"] = llist
+        return dic
     
     def to_json(self):
         """
         Creates a JSON string object which can be interpreted by other programs.
         """
-        pass
+        return json.dumps(self.to_dict())
         
 
 
@@ -157,6 +158,12 @@ class BoardTests(unittest.TestCase):
     def test_Board_creation(self):
         with self.assertRaises(FileNotFoundError) as context:
             Board("bla.board")
+
+        b = self.boards[0]
+        t = b.tiles[1][0]
+        self.assertEqual(t.height,-1)
+        self.assertEqual(t.properties,[])
+        self.assertEqual(t.tile_type,"snow")
 
 
 
