@@ -20,7 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 import os
 import unittest
 from .functions import strip_and_part_line
@@ -34,7 +34,10 @@ class Tile:
     pos_y: int = -1
     tile_type: str = ""
     height: int = 0
-    properties: tuple = field(default_factory= lambda: tuple())
+    properties: list = field(default_factory= lambda: list())
+
+    def to_dict(self):
+        return asdict(self)
 
 class Board:
     """
@@ -76,10 +79,24 @@ class Board:
         tile_type = line[-1].replace('"',"")
         properties = line[-2].replace('"',"")
         properties = properties.split(';')
-        properties = tuple(tuple([int(e) if k > 0 else e for k,e in enumerate(p.split(':'))])
-                           for p in properties)
+        properties = [[int(e) if k > 0 else e for k,e in enumerate(p.split(':'))]
+                           for p in properties]
         height = int(line[2])
         return Tile(pos_x=pos_x,pos_y=pos_y,tile_type=tile_type,properties=properties,height=height)
+
+    def to_dict(self):
+        """
+        Creates a dictionary object which is easyily convertible to json.
+        """
+        dic = {"size_x": self.size_x,"size_y":self.size_y}
+        llist = [[tile.to_dict() for tile in row] for row in self.tiles]
+        dic["tiles"] = llist
+    
+    def to_json(self):
+        """
+        Creates a JSON string object which can be interpreted by other programs.
+        """
+        pass
         
 
 
@@ -94,20 +111,20 @@ class TileTests(unittest.TestCase):
     """
     def setUp(self):
         self.empty_tile = Tile()
-        self.test_tile = Tile(pos_x=0,pos_y=1,tile_type="snow",properties=(("planted_fields",1),),\
+        self.test_tile = Tile(pos_x=0,pos_y=1,tile_type="snow",properties=[["planted_fields",1]],\
                               height=-1)
     
     def test_Tile_creation(self):
         self.assertEqual(self.empty_tile.pos_x,-1)
         self.assertEqual(self.empty_tile.pos_y,-1)
         self.assertEqual(self.empty_tile.tile_type,"")
-        self.assertEqual(self.empty_tile.properties,())
+        self.assertEqual(self.empty_tile.properties,[])
         self.assertEqual(self.empty_tile.height,0)
 
         self.assertEqual(self.test_tile.pos_x,0)
         self.assertEqual(self.test_tile.pos_y,1)
         self.assertEqual(self.test_tile.tile_type,"snow")
-        self.assertEqual(self.test_tile.properties,(("planted_fields",1),))
+        self.assertEqual(self.test_tile.properties,[["planted_fields",1]])
         self.assertEqual(self.test_tile.height,-1)
         
 
@@ -135,7 +152,7 @@ class BoardTests(unittest.TestCase):
         self.assertEqual(tile.pos_y,1)
         self.assertEqual(tile.height,-2)
         self.assertEqual(tile.tile_type,"snow")
-        self.assertEqual(tile.properties,(("planted_fields",1),))
+        self.assertEqual(tile.properties,[["planted_fields",1]])
         
     def test_Board_creation(self):
         with self.assertRaises(FileNotFoundError) as context:
