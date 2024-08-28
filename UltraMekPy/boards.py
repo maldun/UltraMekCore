@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
 from dataclasses import dataclass, field, asdict
+import json
 import os
 import unittest
 from .functions import strip_and_part_line
@@ -42,6 +43,13 @@ class Tile:
 class Board:
     """
     Class to parse and handle board files and provide logic and transforms.
+    Tiles direction: (list is transposed for convienience, i.e. self.tiles[x][y]
+    calls the tile on pos_x and pos_y, to make closer to usage in numpy)
+    ------- x
+    |
+    |
+    |
+    y
     """
     SIZE_IDENTIFIER = "size"
     HEX_IDENTIFIER = "hex"
@@ -56,10 +64,11 @@ class Board:
                 if line.startswith(self.SIZE_IDENTIFIER): # We assume this is always first!
                     self.size_x, self.size_y = self.get_dims(line)
                     line_nr = 0
-                    tiles = [[None for k in range(self.size_x)]
-                                      for l in range(self.size_y)] 
+                    self.tiles = [[None for k in range(self.size_y)]
+                                      for l in range(self.size_x)] 
                 elif line.startswith(self.HEX_IDENTIFIER):
-                    self.create_tile_from_line(line,line_nr)
+                    tile = self.create_tile_from_line(line,line_nr)
+                    self.tiles[tile.pos_x][tile.pos_y] = tile
                     line_nr += 1
                 elif line.startswith(self.END_IDENTIFIER):
                     break
@@ -78,9 +87,12 @@ class Board:
         line = strip_and_part_line(line)
         tile_type = line[-1].replace('"',"")
         properties = line[-2].replace('"',"")
-        properties = properties.split(';')
-        properties = [[int(e) if k > 0 else e for k,e in enumerate(p.split(':'))]
-                           for p in properties]
+        if properties != '':
+            properties = properties.split(';')
+            properties = [[int(e) if k > 0 else e for k,e in enumerate(p.split(':'))]
+                            for p in properties]
+        else:
+            properties = []
         height = int(line[2])
         return Tile(pos_x=pos_x,pos_y=pos_y,tile_type=tile_type,properties=properties,height=height)
 
@@ -127,6 +139,12 @@ class TileTests(unittest.TestCase):
         self.assertEqual(self.test_tile.tile_type,"snow")
         self.assertEqual(self.test_tile.properties,[["planted_fields",1]])
         self.assertEqual(self.test_tile.height,-1)
+
+    def test_to_dict(self):
+        dic = self.test_tile.to_dict()
+        self.assertIsInstance(dic,dict)
+        self.assertEqual(dic["tile_type"],"snow")
+        self.assertEqual(dic["height"],-1)
         
 
 class BoardTests(unittest.TestCase):
@@ -166,6 +184,20 @@ class BoardTests(unittest.TestCase):
         self.assertEqual(t.tile_type,"snow")
 
 
+    def test_to_dict(self):
+        b = self.boards[0]
+        d = b.to_dict()
+        t = d["tiles"][1][0]
+        self.assertEqual(t['height'],-1)
+        self.assertEqual(t['tile_type'],"snow")
+        self.assertEqual(d["size_x"],b.size_x)
+        self.assertEqual(d["size_y"],b.size_y)
+        
+    def test_to_json(self):
+        b = self.boards[0]
+        j = b.to_json()
+        self.assertIsInstance(j,str)
+        print(j)
 
 
 
