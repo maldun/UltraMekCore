@@ -4,4 +4,5 @@
 unittests
 *.dblite
 *.so
+*.pyc
 
