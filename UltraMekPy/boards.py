@@ -61,7 +61,8 @@ class Board:
     HEX_IDENTIFIER = "hex"
     END_IDENTIFIER = "end"
 
-    LAYERS = {"wood","heights","rough","sand","swamp","water","planted_fields","foliage_elev","ttype"}
+    LAYERS = {"wood","heights","rough","sand","swamp","water","planted_fields","foliage_elev",
+                  "tile_type"}
     
     def __init__(self,filename):
         if not os.path.exists(filename):
@@ -130,7 +131,7 @@ class Board:
         for layer in self.LAYERS:
             if layer == "heights":
                 layer_dict[layer] = [[tile.height for tile in row] for row in self.tiles]
-            elif layer == "ttype":
+            elif layer == "tile_type":
                 layer_dict[layer] = [[tile.tile_type for tile in row] for row in self.tiles]
             else:
                 layer_dict[layer] = [[tile.get_property(layer) for tile in row]

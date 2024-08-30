@@ -24,8 +24,8 @@ import json
 import socketserver
 import socket
 
-from . import client
 from . import server
+from . import game
 
 with open("UltraMekPy/config.json",'r') as conf:
     conn_dict = json.load(conf)['connection']
@@ -40,10 +40,3 @@ with socketserver.TCPServer((host,port), server.UltraMekHandler) as server:
         server.allow_reuse_address=True
         server.serve_forever()
 
-
-
-# client = client.UDPClient(**conf_dict['connection'])
-# #msg = json.dumps({"Message":"Hello from Python"})
-# client.send("Hello from Python!")
-# data, (recv_ip,recv_port) = client.recieve(return_port_info=True)
-# print(f"Recieved: '{data.decode()}' {recv_ip}:{recv_port}")

@@ -25,6 +25,7 @@ import os
 
 from . import boards
 from . import functions as fn
+from . import game
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -42,20 +43,20 @@ class RequestProcessor:
     def get_request(self, dic):
         return dic[self.request_type] 
     
-    def __call__(self, dic):
+    def __call__(self, dic, game_state):
         request = dic
-        #request = self.get_request(dic)
 
-        result =  self._process(request)
+        result =  self._process(request, game_state)
         return result
 
 
 class BoardRequest(RequestProcessor):
 
-    def _process(self, request):
+    def _process(self, request, game_state):
         fname = request['filename']
         b = boards.Board(fname)
         j = b.to_flat_dict()
+        game_state.setup_board(b)
         return j
 
 rtypes = [BoardRequest]

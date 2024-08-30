@@ -25,11 +25,19 @@ import socketserver
 from .constants import NL
 
 from . import requests as req
+from . import game
 
 class UltraMekHandler(socketserver.StreamRequestHandler):
     """
     TCP Server for UltraMek for managing games and doing stuff 
     """
+
+    def setup(self):
+        super().setup()
+        self.setup_game_state()
+    
+    def setup_game_state(self):
+        self.game_state = game.GameState()
     
     def request_processor(self, request):
         """
@@ -37,7 +45,7 @@ class UltraMekHandler(socketserver.StreamRequestHandler):
         """
         result = {}
         for request_type, request_data in request.items():
-            res = req.request_type_map[request_type](request_data)
+            res = req.request_type_map[request_type](request_data,self.game_state)
             result[request_type] = res
         return json.dumps(result) + NL
     
@@ -52,7 +60,7 @@ class UltraMekHandler(socketserver.StreamRequestHandler):
         #print(self.data)
         # Likewise, self.wfile is a file-like object used to write back
         # to the client
-        print(result)
+        print("Answer: ", result)
         #self.wfile.write(self.data.upper())
         self.wfile.write(result.encode())
         #self.wfile.write("Help!\n".encode())
