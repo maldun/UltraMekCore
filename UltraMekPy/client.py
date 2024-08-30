@@ -27,6 +27,10 @@ IP = "127.0.0.1"
 BUFFER_SIZE = 1024
 
 class UDPClient:
+    """
+    Simple UDP client for testing stuff
+    """
+    PROTOCOL = socket.SOCK_DGRAM
     def __init__(self,port=PORT,ip=IP,standard_buffer_size=BUFFER_SIZE):
         self.port = port
         self.ip = ip
@@ -34,7 +38,7 @@ class UDPClient:
         self.create_socket()
 
     def create_socket(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket = socket.socket(socket.AF_INET, self.PROTOCOL)
 
     def send(self,msg):
         self.socket.sendto(msg.encode(), (self.ip, self.port))
@@ -47,6 +51,4 @@ class UDPClient:
             return data, (recv_ip, recv_port)
         else:
             return data
-        
-
 

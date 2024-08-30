@@ -23,6 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
 import unittest
+import re
+
+def split_camel_case(string):
+    matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', string)
+    return [m.group(0) for m in matches]
 
 def strip_and_part_line(line,char=None):
     line = line.strip()
@@ -39,3 +44,11 @@ class FunctionTests(unittest.TestCase):
         result = strip_and_part_line(line)
         for r,c in zip(result,['a','b','c']):
             self.assertEqual(r,c)
+
+    def test_camel_case_spliter(self):
+        line = "CamelCase"
+        result =split_camel_case(line)
+        expected = ["Camel","Case"]
+        for r, e in zip(result,expected):
+            self.assertEqual(r,e)
+            

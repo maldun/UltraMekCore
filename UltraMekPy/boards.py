@@ -40,6 +40,12 @@ class Tile:
     def to_dict(self):
         return asdict(self)
 
+    def get_property(self, prop):
+        for p in self.properties:
+            if prop == p[0]:
+                return p[1]
+        return 0
+
 class Board:
     """
     Class to parse and handle board files and provide logic and transforms.
@@ -54,6 +60,8 @@ class Board:
     SIZE_IDENTIFIER = "size"
     HEX_IDENTIFIER = "hex"
     END_IDENTIFIER = "end"
+
+    LAYERS = {"wood","heights","rough","sand","swamp","water","planted_fields","foliage_elev","ttype"}
     
     def __init__(self,filename):
         if not os.path.exists(filename):
@@ -72,6 +80,8 @@ class Board:
                     line_nr += 1
                 elif line.startswith(self.END_IDENTIFIER):
                     break
+
+        self.layers = None
                     
                 
     @staticmethod
@@ -110,9 +120,34 @@ class Board:
         Creates a JSON string object which can be interpreted by other programs.
         """
         return json.dumps(self.to_dict())
+
+    def flatten(self):
+        """
+        Flattens the board in that sense as it stores it in several
+        flat layers which are easier to process by logic
+        """
+        layer_dict = {}
+        for layer in self.LAYERS:
+            if layer == "heights":
+                layer_dict[layer] = [[tile.height for tile in row] for row in self.tiles]
+            elif layer == "ttype":
+                layer_dict[layer] = [[tile.tile_type for tile in row] for row in self.tiles]
+            else:
+                layer_dict[layer] = [[tile.get_property(layer) for tile in row]
+                                        for row in self.tiles]
+        self.layers = layer_dict
+
+
+    def to_flat_dict(self):
+        """
+        Creates a dictionary object which is easyily convertible to json.
+        """
+        if self.layers is None:
+            self.flatten()
+        dic = {"size_x": self.size_x,"size_y":self.size_y}
+        dic.update(self.layers)
+        return dic
         
-
-
 
 ##########################################################
 # Tests

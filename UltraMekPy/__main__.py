@@ -20,14 +20,30 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+import json
+import socketserver
+import socket
 
 from . import client
-import json
+from . import server
 
 with open("UltraMekPy/config.json",'r') as conf:
-    conf_dict = json.load(conf)
-    client = client.UDPClient(**conf_dict['connection'])
-    #msg = json.dumps({"Message":"Hello from Python"})
-    client.send("Hello from Python!")
-    data, (recv_ip,recv_port) = client.recieve(return_port_info=True)
-    print(f"Recieved: '{data.decode()}' {recv_ip}:{recv_port}")
+    conn_dict = json.load(conf)['connection']
+
+
+host, port = conn_dict['ip'], conn_dict['port']
+with socketserver.TCPServer((host,port), server.UltraMekHandler) as server:
+        # Activate the server; this will keep running until you
+        # interrupt the program with Ctrl-C
+        #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.allow_reuse_address=True
+        server.serve_forever()
+
+
+
+# client = client.UDPClient(**conf_dict['connection'])
+# #msg = json.dumps({"Message":"Hello from Python"})
+# client.send("Hello from Python!")
+# data, (recv_ip,recv_port) = client.recieve(return_port_info=True)
+# print(f"Recieved: '{data.decode()}' {recv_ip}:{recv_port}")
