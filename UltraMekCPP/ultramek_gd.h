@@ -1,4 +1,4 @@
-// unittests.hh - cpp unittests header for Ultramek (compatible with MegaMek)
+// ultramek_gd.h - Ultramek cpp bindings for godot (compatible with MegaMek)
 
 // Copyright © 2024 Stefan H. Reiterer.
 // stefan.harald.reiterer@gmail.com 
@@ -18,16 +18,35 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef UT_H
-#define UT_H
-#include<vector>
-#include<map>
-#include<iostream>
-#include<string>
-#include "../UltraMekCPP/ultramek.hpp"
+//Used snippets of code by © Copyright 2014-2022, Juan Linietsky, Ariel Manzur and the Godot community (CC-BY 3.0)
 
-using namespace std;
+#ifndef ULTRAMEK_GD_H
+#define ULTRAMEK_GD_H
 
-int main(int , char**);
-
+// We don't need windows.h in this plugin but many others do and it throws up on itself all the time
+// So best to include it and make sure CI warns us when we use something Microsoft took for their own goals....
+#ifdef WIN32
+#include <windows.h>
 #endif
+
+#include <godot_cpp/classes/ref.hpp>
+#include "ultramek.hpp"
+
+using namespace godot;
+
+class UltraMekGD : public RefCounted
+{
+    GDCLASS(UltraMekGD, RefCounted);
+    UltraMek mek = UltraMek();
+
+protected:
+    static void _bind_methods();
+
+public:
+    UltraMekGD();
+    ~UltraMekGD();
+
+    void doubling(int p_value);
+};
+
+#endif //ULTRAMEK_GD_H

@@ -18,3 +18,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#include "ultramek.hpp"
+
+UltraMek::UltraMek()
+{
+    // do nothing (yet)
+}
+
+int test_doubling()
+{
+  UltraMek mek = UltraMek();
+  if(mek.doubling(2) != 4){ return 1;}
+
+  return 0;
+}
+
+int ultra_mek_tests()
+{
+  if(test_doubling()!=0)
+  {
+    cout << "Test Doubling failed!" << endl;
+    return 1;
+  }
+  
+  cout << "UkltraMek tests passed!" << endl;
+  return 0;
+}

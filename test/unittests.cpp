@@ -22,6 +22,12 @@
 
 int main(int argc, char *argv[])
 {
+
+    if(ultra_mek_tests() != 0)
+    {
+      cout << "UltraMek Tests failed" << endl;
+      throw runtime_error("Error: Ultramek Test Failed!");
+    }
     cout << "All tests passed!" << endl;
     return 0;
 } 

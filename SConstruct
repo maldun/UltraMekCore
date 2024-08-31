@@ -1,5 +1,5 @@
 cpp = Environment(CCFLAGS=['-Wall'],LIBPATH=['UltraMekCPP'])
-cfiles = ["test/unittests.cpp","UltraMekCPP/helpers.cpp","UltraMekCPP/geometry.cpp"]
+cfiles = ["test/unittests.cpp","UltraMekCPP/helpers.cpp","UltraMekCPP/geometry.cpp","UltraMekCPP/ultramek.cpp"]
 hfiles = [f.replace(".cpp",".hpp") for f in cfiles]
 
 cpp.SharedLibrary("UltraMekCPP/ultramek",cfiles,include=hfiles)

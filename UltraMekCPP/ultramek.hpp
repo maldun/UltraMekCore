@@ -18,4 +18,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#ifndef ULTRAMEK_H
+#define ULTRAMEK_H
+
 #include "helpers.hpp"
+
+class UltraMek
+{
+  public:
+    UltraMek();
+  int doubling(int); // for test purposes ...
+    
+};
+
+inline int UltraMek::doubling(int x)
+{
+    return 2*x;
+}
+
+int ultra_mek_tests();
+
+#endif
