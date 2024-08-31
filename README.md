@@ -1,5 +1,5 @@
 # UltraMekCore
-Client for UltraMek© in Python
+Client for UltraMek© in Python/CPP
 
 ## License
 
