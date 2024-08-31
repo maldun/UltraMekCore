@@ -22,7 +22,11 @@
 
 int main(int argc, char *argv[])
 {
-
+    if(geometry_tests() != 0)
+    {
+      cout << "Geometry Tests failed" << endl;
+      throw runtime_error("Error: Geometry Test Failed!");
+    }
     if(ultra_mek_tests() != 0)
     {
       cout << "UltraMek Tests failed" << endl;

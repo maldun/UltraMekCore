@@ -1,6 +1,7 @@
 #!/bin/bash
 scons
-export LD_LIBRARY_PATH=$(pwd)/UltraMekCPP:$(LD_LIBRARY_PATH)
+
+export LD_LIBRARY_PATH=$(pwd)/UltraMekCPP:$LD_LIBRARY_PATH
 
 printf "\n"
 printf "==================================== CPP Tests =====================================\n"

@@ -22,19 +22,28 @@
 #define ULTRAMEK_H
 
 #include "helpers.hpp"
+#include "geometry.hpp"
 
 class UltraMek
 {
+  double unit_length;
+  
   public:
     UltraMek();
-  int doubling(int); // for test purposes ...
+    ~UltraMek();
+    double doubling(double); // for test purposes ...
+     void set_unit_length(double);
+     double get_unit_length();
+     double get_hex_diameter();
+     double ***create_grid_centers(int,int);
+    
     
 };
 
-inline int UltraMek::doubling(int x)
-{
-    return 2*x;
-}
+inline double UltraMek::doubling(double x) {return 2*x;}
+inline void UltraMek::set_unit_length(double l) {unit_length = l;}
+inline double UltraMek::get_unit_length() {return unit_length;}
+inline double UltraMek::get_hex_diameter() {return doubling(unit_length);}
 
 int ultra_mek_tests();
 

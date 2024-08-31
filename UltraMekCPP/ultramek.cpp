@@ -20,16 +20,55 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "ultramek.hpp"
+#include "geometry.hpp"
 
 UltraMek::UltraMek()
+{
+  unit_length = 1.0;
+}
+
+UltraMek::~UltraMek()
 {
     // do nothing (yet)
 }
 
+
+double ***UltraMek::create_grid_centers(int dim_x, int dim_y)
+{
+  double ***matrix = compute_grid_centers(dim_x,dim_y,unit_length);
+
+  return matrix;
+      
+}
+
+
+//////////////////////////////////////// TESTS /////////////////////////////////////////////////////
+
+
 int test_doubling()
 {
   UltraMek mek = UltraMek();
-  if(mek.doubling(2) != 4){ return 1;}
+  if(mek.doubling(2.0) != 4.0){ return 1;}
+
+  return 0;
+}
+
+int test_unit_length()
+{
+  UltraMek mek = UltraMek();
+  if(mek.get_unit_length() != 1.0){ return 1;}
+  mek.set_unit_length(2.0);
+  if(mek.get_unit_length() != 2.0){ return 1;}
+
+  return 0;
+}
+
+int test_hex_diameter()
+{
+  UltraMek mek = UltraMek();
+  if(mek.get_hex_diameter() != 2.0){ return 1;}
+  mek.set_unit_length(2.0);
+  if(mek.get_hex_diameter() != 4.0){ return 1;}
 
   return 0;
 }
@@ -39,6 +78,18 @@ int ultra_mek_tests()
   if(test_doubling()!=0)
   {
     cout << "Test Doubling failed!" << endl;
+    return 1;
+  }
+
+  if(test_hex_diameter()!=0)
+  {
+    cout << "Test hex diameter failed!" << endl;
+    return 1;
+  }
+
+  if(test_unit_length()!=0)
+  {
+    cout << "Test unit_length failed!" << endl;
     return 1;
   }
   

@@ -25,6 +25,7 @@
 #include<iostream>
 #include<string>
 #include "../UltraMekCPP/ultramek.hpp"
+#include "../UltraMekCPP/geometry.hpp"
 
 using namespace std;
 

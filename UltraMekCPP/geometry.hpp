@@ -24,8 +24,21 @@
 #include<map>
 #include<iostream>
 #include<string>
+#include<cmath>
 #include "helpers.hpp"
 
 using namespace std;
+
+const double PI = atan(1)*4;
+
+double **initialize_2d_matrix(unsigned int, unsigned int);
+double ***initialize_3d_matrix(unsigned int, unsigned int,unsigned int);
+double ***compute_grid_centers(unsigned int, unsigned int,double);
+double compute_hex_height(double);
+double compute_hex_sub_height(double);
+
+int geometry_tests();
+
+
 
 #endif

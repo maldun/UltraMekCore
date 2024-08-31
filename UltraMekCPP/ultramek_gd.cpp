@@ -25,21 +25,41 @@ using namespace godot;
 
 UltraMekGD::UltraMekGD()
 {
-  //mek = UltraMek();
+  mek = UltraMek();
+}
+
+void UltraMekGD::set_unit_length(double l)
+{
+  mek.set_unit_length(l);
+}
+
+double UltraMekGD::get_unit_length()
+{
+  return mek.get_unit_length();
 }
 
 UltraMekGD::~UltraMekGD()
 {
 }
 
-int UltraMekGD::doubling(int value)
+double UltraMekGD::get_hex_diameter()
 {
-  return 2*value;
+  int result = mek.get_hex_diameter();
+  return result;
+}
+
+double UltraMekGD::doubling(double x)
+{
+  double result = mek.doubling(x);
+  return result;
 }
 
 void UltraMekGD::_bind_methods()
 {
+    ClassDB::bind_method(D_METHOD("get_hex_diameter"), &UltraMekGD::get_hex_diameter);
+    ClassDB::bind_method(D_METHOD("set_unit_length", "value"), &UltraMekGD::set_unit_length,
+			 DEFVAL(1));
     ClassDB::bind_method(D_METHOD("doubling", "value"), &UltraMekGD::doubling, DEFVAL(1));
-    //ClassDB::bind_method(D_METHOD("reset"), &Summator::reset);
+    ClassDB::bind_method(D_METHOD("get_unit_length"), &UltraMekGD::get_unit_length);
     //ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
 }
