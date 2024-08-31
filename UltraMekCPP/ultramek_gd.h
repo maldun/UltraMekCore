@@ -30,14 +30,14 @@
 #endif
 
 #include <godot_cpp/classes/ref.hpp>
-#include "ultramek.hpp"
+//#include "ultramek.hpp"
 
 using namespace godot;
 
 class UltraMekGD : public RefCounted
 {
     GDCLASS(UltraMekGD, RefCounted);
-    UltraMek mek = UltraMek();
+    //UltraMek mek;
 
 protected:
     static void _bind_methods();
@@ -46,7 +46,7 @@ public:
     UltraMekGD();
     ~UltraMekGD();
 
-    void doubling(int p_value);
+    int doubling(int p_value);
 };
 
 #endif //ULTRAMEK_GD_H

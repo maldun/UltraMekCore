@@ -6,3 +6,4 @@ unittests
 *.so
 *.pyc
 \#*\#
+UltraMekCPP/gen

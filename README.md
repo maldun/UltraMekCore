@@ -1,6 +1,11 @@
 # UltraMekCore
 Client for UltraMek© in Python/CPP
 
+## Install Notes
+
+The CPP folder and the godot_SConstruct should be just symlinked
+to be at the proper level in a godot project
+
 ## License
 
 Copyright © 2024 Stefan H. Reiterer.

@@ -17,3 +17,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#include "ultramek_gd.h"
+#include <godot_cpp/core/class_db.hpp>
+
+using namespace godot;
+
+UltraMekGD::UltraMekGD()
+{
+  //mek = UltraMek();
+}
+
+UltraMekGD::~UltraMekGD()
+{
+}
+
+int UltraMekGD::doubling(int value)
+{
+  return 2*value;
+}
+
+void UltraMekGD::_bind_methods()
+{
+    ClassDB::bind_method(D_METHOD("doubling", "value"), &UltraMekGD::doubling, DEFVAL(1));
+    //ClassDB::bind_method(D_METHOD("reset"), &Summator::reset);
+    //ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
+}
