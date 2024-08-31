@@ -25,6 +25,7 @@
 UltraMek::UltraMek()
 {
   unit_length = 1.0;
+  unit_height = 1.0;
 }
 
 UltraMek::~UltraMek()
@@ -36,9 +37,13 @@ UltraMek::~UltraMek()
 double ***UltraMek::create_grid_centers(int dim_x, int dim_y)
 {
   double ***matrix = compute_grid_centers(dim_x,dim_y,unit_length);
-
   return matrix;
-      
+}
+
+double **UltraMek::create_hex_vertices(double pos_x, double pos_y, double length, double height)
+{
+  double **matrix = compute_hex_vertices(pos_x,pos_y,length,height);
+  return matrix;     
 }
 
 
@@ -59,6 +64,16 @@ int test_unit_length()
   if(mek.get_unit_length() != 1.0){ return 1;}
   mek.set_unit_length(2.0);
   if(mek.get_unit_length() != 2.0){ return 1;}
+
+  return 0;
+}
+
+int test_unit_height()
+{
+  UltraMek mek = UltraMek();
+  if(mek.get_unit_height() != 1.0){ return 1;}
+  mek.set_unit_height(2.0);
+  if(mek.get_unit_height() != 2.0){ return 1;}
 
   return 0;
 }
@@ -90,6 +105,12 @@ int ultra_mek_tests()
   if(test_unit_length()!=0)
   {
     cout << "Test unit_length failed!" << endl;
+    return 1;
+  }
+
+  if(test_unit_height()!=0)
+  {
+    cout << "Test unit_height failed!" << endl;
     return 1;
   }
   

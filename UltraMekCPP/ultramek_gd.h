@@ -49,8 +49,11 @@ public:
     double get_hex_diameter();
     double doubling(double);
     void set_unit_length(double);
+    void set_unit_height(double);
     double get_unit_length();
+    double get_unit_height();
     Array create_grid_centers(int,int);
+    Array create_hex_vertices(double,double,double,double);
 };
 
 #endif //ULTRAMEK_GD_H

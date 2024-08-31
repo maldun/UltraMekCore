@@ -31,12 +31,20 @@ using namespace std;
 
 const double PI = atan(1)*4;
 const int DIM2 = 2;
+const int DIM3 = 3;
+const int HEX = 6;
+
+double compute_hex_height(double);
+double compute_hex_sub_height(double);
 
 double **initialize_2d_matrix(unsigned int, unsigned int);
 double ***initialize_3d_matrix(unsigned int, unsigned int,unsigned int);
+
+double **compute_hex_vertices(double,double,double,double);
 double ***compute_grid_centers(unsigned int, unsigned int,double);
-double compute_hex_height(double);
-double compute_hex_sub_height(double);
+
+
+
 
 int geometry_tests();
 

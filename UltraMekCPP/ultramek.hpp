@@ -27,22 +27,26 @@
 class UltraMek
 {
   double unit_length;
+  double unit_height;
   
   public:
     UltraMek();
     ~UltraMek();
     double doubling(double); // for test purposes ...
      void set_unit_length(double);
+     void set_unit_height(double);
      double get_unit_length();
+     double get_unit_height();
      double get_hex_diameter();
      double ***create_grid_centers(int,int);
-    
-    
+     double **create_hex_vertices(double,double,double,double);
 };
 
 inline double UltraMek::doubling(double x) {return 2*x;}
 inline void UltraMek::set_unit_length(double l) {unit_length = l;}
+inline void UltraMek::set_unit_height(double l) {unit_height = l;}
 inline double UltraMek::get_unit_length() {return unit_length;}
+inline double UltraMek::get_unit_height() {return unit_height;}
 inline double UltraMek::get_hex_diameter() {return doubling(unit_length);}
 
 int ultra_mek_tests();

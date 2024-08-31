@@ -28,6 +28,11 @@ UltraMekGD::UltraMekGD()
   mek = UltraMek();
 }
 
+UltraMekGD::~UltraMekGD()
+{
+}
+
+
 void UltraMekGD::set_unit_length(double l)
 {
   mek.set_unit_length(l);
@@ -35,11 +40,17 @@ void UltraMekGD::set_unit_length(double l)
 
 double UltraMekGD::get_unit_length()
 {
-  return mek.get_unit_length();
+  return mek.get_unit_height();
 }
 
-UltraMekGD::~UltraMekGD()
+void UltraMekGD::set_unit_height(double l)
 {
+  mek.set_unit_height(l);
+}
+
+double UltraMekGD::get_unit_height()
+{
+  return mek.get_unit_height();
 }
 
 Array UltraMekGD::create_grid_centers(int dim_x, int dim_y)
@@ -57,6 +68,18 @@ Array UltraMekGD::create_grid_centers(int dim_x, int dim_y)
     centers.push_back(content);
   }
   return centers; 
+}
+
+Array UltraMekGD::create_hex_vertices(double pos_x,double pos_y,double length,double height)
+{
+  Array verts;
+  double **vert_matrix = mek.create_hex_vertices(pos_x,pos_y,length,height);
+  for(int i=0;i<2*HEX;i++)
+  {
+    Vector3 c(vert_matrix[i][0],vert_matrix[i][1],vert_matrix[i][2]);
+    verts.push_back(c);
+  }
+  return verts; 
 }
 
 
@@ -77,9 +100,15 @@ void UltraMekGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("get_hex_diameter"), &UltraMekGD::get_hex_diameter);
     ClassDB::bind_method(D_METHOD("set_unit_length", "value"), &UltraMekGD::set_unit_length,
 			 DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("set_unit_height", "value"), &UltraMekGD::set_unit_height,
+			 DEFVAL(1));
     ClassDB::bind_method(D_METHOD("doubling", "value"), &UltraMekGD::doubling, DEFVAL(1));
     ClassDB::bind_method(D_METHOD("get_unit_length"), &UltraMekGD::get_unit_length);
+    ClassDB::bind_method(D_METHOD("get_unit_height"), &UltraMekGD::get_unit_height);
     ClassDB::bind_method(D_METHOD("create_grid_centers", "dim_x", "dim_y"),
 			 &UltraMekGD::create_grid_centers, DEFVAL(1),DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("create_hex_vertices", "pos_x", "pos_y","length","height"),
+			 &UltraMekGD::create_hex_vertices,
+			 DEFVAL(0),DEFVAL(0),DEFVAL(1),DEFVAL(1));
     //ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
 }
