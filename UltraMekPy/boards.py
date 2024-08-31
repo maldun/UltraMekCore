@@ -233,7 +233,6 @@ class BoardTests(unittest.TestCase):
         b = self.boards[0]
         j = b.to_json()
         self.assertIsInstance(j,str)
-        print(j)
 
 
 
