@@ -1,4 +1,5 @@
-// unittests.hh - cpp unittests header for Ultramek (compatible with MegaMek)
+
+// ultramek.cpp - cpp library for Ultramek (compatible with MegaMek)
 
 // Copyright © 2024 Stefan H. Reiterer.
 // stefan.harald.reiterer@gmail.com 
@@ -17,16 +18,3 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-#ifndef UT_H
-#define UT_H
-#include<vector>
-#include<map>
-#include<iostream>
-#include<string>
-
-using namespace std;
-
-int main(int , char**);
-
-#endif
