@@ -57,9 +57,22 @@ double ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned in
 double ***compute_grid_centers(unsigned int dim_x, unsigned int dim_y, double unit_length)
 {
 
+   double ***centers = initialize_3d_matrix(dim_x,dim_y,DIM2);
+   double shift_x = unit_length;
+   double shift_y = compute_hex_height(unit_length)/2.0;
+   double delta_x = 3*unit_length/2;
+   double delta_y = compute_hex_height(unit_length);
    
-   double ***centers = initialize_3d_matrix(dim_x,dim_y,2);
-   
+   for(unsigned int i = 0; i<dim_x;i++)
+   {
+       for(unsigned int j = 0; j<dim_y;j++)
+       {
+	   // x - coord
+           centers[i][j][0] = shift_x + i*delta_x;
+	   // y - coord
+           centers[i][j][1] = - shift_y - (i%2)*shift_y - j*delta_y;
+       }
+   }
    return centers;
 }
 
@@ -129,6 +142,28 @@ int test_2d_matrix_creation()
   return 0;
 }
 
+int test_compute_grid_centers()
+{
+  int x = 2; int y = 2;
+  double l = 1.0;
+  double ***matrix = compute_grid_centers(x,y,l);
+  if(matrix[0][0][0] != l){return l;}
+  if(matrix[0][0][1] != -sqrt(3)*l/2.0){return 1;}
+  if(matrix[1][0][0] != 2.5*l){return 1;}
+  if(matrix[1][0][1] != -sqrt(3)*l){return 1;}
+
+  if(matrix[0][1][0] != l){return 1;}
+  if(matrix[0][1][1] != -3*sqrt(3)*l/2.0){return 1;}
+  if(matrix[1][1][0] != 2.5*l){return 1;}
+  if(matrix[1][1][1] != -2.0*sqrt(3)*l){return 1;}
+
+  delete matrix;
+
+  
+  return 0;
+  
+}
+
 int geometry_tests()
 {
 
@@ -153,6 +188,12 @@ int geometry_tests()
   if(test_3d_matrix_creation() != 0)
   {
     cout << "Test 3d matrix creation failed!" << endl;
+    return 1;
+  }
+
+  if(test_compute_grid_centers() != 0)
+  {
+    cout << "Test grid center creation failed!" << endl;
     return 1;
   }
   

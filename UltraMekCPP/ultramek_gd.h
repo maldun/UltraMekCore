@@ -50,6 +50,7 @@ public:
     double doubling(double);
     void set_unit_length(double);
     double get_unit_length();
+    Array create_grid_centers(int,int);
 };
 
 #endif //ULTRAMEK_GD_H

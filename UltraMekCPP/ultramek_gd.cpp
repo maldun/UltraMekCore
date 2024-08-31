@@ -42,6 +42,24 @@ UltraMekGD::~UltraMekGD()
 {
 }
 
+Array UltraMekGD::create_grid_centers(int dim_x, int dim_y)
+{
+  Array centers;
+  double ***center_matrix = mek.create_grid_centers(dim_x, dim_y);
+  for(int i=0;i<dim_x;i++)
+  {
+    Array content;
+    for(int j=0;j<dim_y;j++)
+    {
+      Vector2 c(center_matrix[i][j][0],center_matrix[i][j][1]);
+      content.push_back(c);
+    }
+    centers.push_back(content);
+  }
+  return centers; 
+}
+
+
 double UltraMekGD::get_hex_diameter()
 {
   int result = mek.get_hex_diameter();
@@ -61,5 +79,7 @@ void UltraMekGD::_bind_methods()
 			 DEFVAL(1));
     ClassDB::bind_method(D_METHOD("doubling", "value"), &UltraMekGD::doubling, DEFVAL(1));
     ClassDB::bind_method(D_METHOD("get_unit_length"), &UltraMekGD::get_unit_length);
+    ClassDB::bind_method(D_METHOD("create_grid_centers", "dim_x", "dim_y"),
+			 &UltraMekGD::create_grid_centers, DEFVAL(1),DEFVAL(1));
     //ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
 }
