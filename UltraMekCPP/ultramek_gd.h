@@ -54,6 +54,7 @@ public:
     double get_unit_height();
     Array create_grid_centers(int,int);
     Array create_hex_vertices(double,double,double,double);
+    Array create_vertex_order();
 };
 
 #endif //ULTRAMEK_GD_H

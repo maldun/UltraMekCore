@@ -105,6 +105,8 @@ double **compute_hex_vertices(double pos_x, double pos_y,double unit_length,doub
 }
 
 
+
+
 double compute_hex_height(double side_length)
 {
   double c = sqrt(3.0)*side_length;

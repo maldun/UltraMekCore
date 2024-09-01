@@ -43,8 +43,39 @@ double ***initialize_3d_matrix(unsigned int, unsigned int,unsigned int);
 double **compute_hex_vertices(double,double,double,double);
 double ***compute_grid_centers(unsigned int, unsigned int,double);
 
+inline int *compute_vertex_order()
+{
+  int *order = new int[3*24];
+  for(int i=0;i<HEX;i++)
+  {
+    order[0+3*i] = 0;
+    order[1+3*i] = 1+i;
+    if(i+2<7){order[2+3*i] = 2+i;}
+    else {order[2+3*i] = 1;}
 
+    order[18+3*i] = 7;
+    order[18+1+3*i] = 7+1+i;
+    if(7+i+2<14){order[18+2+3*i] = 7+2+i;}
+    else {order[18+2+3*i] = 8;}
 
+    order[36+0+3*i] = 1+i;
+    order[36+1+3*i] = 8+i;
+    if(i<5){
+      order[36+2+3*i] = 1+i+1;}
+    else{
+      order[36+2+3*i] = 1;}
+    
+
+    order[54+0+3*i] = 8+i;
+    if(i<5){
+      order[54+1+3*i] = 8+1+i;
+      order[54+2+3*i] = 2+i;}
+    else{
+      order[54+1+3*i] = 8;
+      order[54+2+3*i] = 1;}
+  }
+  return order;
+}
 
 int geometry_tests();
 

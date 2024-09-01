@@ -46,6 +46,12 @@ double **UltraMek::create_hex_vertices(double pos_x, double pos_y, double length
   return matrix;     
 }
 
+int *UltraMek::create_vertex_order()
+{
+  int *order = compute_vertex_order();
+  return order;     
+}
+
 
 //////////////////////////////////////// TESTS /////////////////////////////////////////////////////
 

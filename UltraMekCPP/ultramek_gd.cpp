@@ -74,12 +74,23 @@ Array UltraMekGD::create_hex_vertices(double pos_x,double pos_y,double length,do
 {
   Array verts;
   double **vert_matrix = mek.create_hex_vertices(pos_x,pos_y,length,height);
-  for(int i=0;i<2*HEX;i++)
+  for(int i=0;i<2*HEX+2;i++)
   {
     Vector3 c(vert_matrix[i][0],vert_matrix[i][1],vert_matrix[i][2]);
     verts.push_back(c);
   }
   return verts; 
+}
+
+Array UltraMekGD::create_vertex_order()
+{
+  Array order;
+  int *order_vec = mek.create_vertex_order();
+  for(int i=0;i<12*HEX;i++)
+  {
+    order.push_back(order_vec[i]);
+  }
+  return order; 
 }
 
 
@@ -110,5 +121,5 @@ void UltraMekGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("create_hex_vertices", "pos_x", "pos_y","length","height"),
 			 &UltraMekGD::create_hex_vertices,
 			 DEFVAL(0),DEFVAL(0),DEFVAL(1),DEFVAL(1));
-    //ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
+    ClassDB::bind_method(D_METHOD("create_vertex_order"), &UltraMekGD::create_vertex_order);
 }

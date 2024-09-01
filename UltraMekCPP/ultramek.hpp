@@ -40,6 +40,7 @@ class UltraMek
      double get_hex_diameter();
      double ***create_grid_centers(int,int);
      double **create_hex_vertices(double,double,double,double);
+     int *create_vertex_order();
 };
 
 inline double UltraMek::doubling(double x) {return 2*x;}
