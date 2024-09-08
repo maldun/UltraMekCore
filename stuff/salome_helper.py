@@ -97,8 +97,8 @@ class Hexagon:
         groups = self.base_mesh.ExtrusionSweepObject2D( obj, stepVector, nbSteps, MakeGroups=True )
         self.b_group.SetName(self.name+'_bot')
         self.bn_group.SetName(self.name+'_nodes_bot')
-        self.t_group = [g for g in groups if g.GetName()==self.name+"_top"]
-        self.tn_group = [g for g in groups if g.GetName()==self.name+"_nodes_top"]
+        self.t_group = [g for g in groups if g.GetName()==self.name+"_top"][0]
+        self.tn_group = [g for g in groups if g.GetName()==self.name+"_nodes_top"][0]
         
         f_group = self.base_mesh.CreateEmptyGroup(SMESH.FACE, self.name+'_temp')
         f_group.AddFrom(self.base_mesh.mesh)
@@ -137,8 +137,20 @@ class Hexagon:
         dic['center_id'] = node_id_map[self.c_group.GetIDs()[0]]
         dic['center_coord'] = msh.GetNodeXYZ(self.c_group.GetIDs()[0])
         
-        dic['order'] = reduce(lambda a,b: a+b,[msh.GetElemNodes(fid) for fid in self.f_group.GetIDs()])
+        dic['order'] = reduce(lambda a,b: a+b,[msh.GetElemNodes(fid) for fid in self.f_group.GetIDs() if fid not in self.t_group.GetIDs()])
         dic['order'] = [node_id_map[nid] for nid in dic['order']]
+        
+        tnids = self.tn_group.GetIDs()
+        tnode_id_map = {nid:k for k,nid in enumerate(tnids)}
+        tvert_dic = {tnode_id_map[nid]: msh.GetNodeXYZ(nid) for nid in tnids}
+        tnormal_dic = {tnode_id_map[nid]: compute_weighted_normal(msh,nid) for nid in tnids}
+        
+        dic['top_verts'] = [tvert_dic[k] for k in range(len(tnids))]
+        dic['top_normals'] = [tnormal_dic[k] for k in range(len(tnids))]
+        dic['top_order'] = reduce(lambda a,b: a+b,[msh.GetElemNodes(fid) for fid in self.t_group.GetIDs()])
+        dic['top_order'] = [tnode_id_map[nid] for nid in dic['top_order']]
+        
+        
         with open(fname,'w') as f:
             json.dump(dic,f,indent=4)
         return dic
