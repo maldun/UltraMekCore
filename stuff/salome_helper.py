@@ -150,6 +150,11 @@ class Hexagon:
         dic['top_order'] = reduce(lambda a,b: a+b,[msh.GetElemNodes(fid) for fid in self.t_group.GetIDs()])
         dic['top_order'] = [tnode_id_map[nid] for nid in dic['top_order']]
         
+        dic['length'] = self.length
+        dic['unit_height'] = self.unit_height
+        dic['height'] = self.height
+        dic['origin'] = list(self.origin)
+        dic['nr_segments'] = self.nr_segments
         
         with open(fname,'w') as f:
             json.dump(dic,f,indent=4)
