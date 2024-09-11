@@ -233,7 +233,12 @@ class BoardTests(unittest.TestCase):
         b = self.boards[0]
         j = b.to_json()
         self.assertIsInstance(j,str)
-
+        
+    def test_to_flat_dict(self):
+        b = self.boards[0]
+        f = b.to_flat_dict()
+        with open('test_json.json','w') as fp:
+            json.dump(f,fp)
 
 
 

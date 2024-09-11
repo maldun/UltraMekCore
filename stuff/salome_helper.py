@@ -143,12 +143,17 @@ class Hexagon:
         tnids = self.tn_group.GetIDs()
         tnode_id_map = {nid:k for k,nid in enumerate(tnids)}
         tvert_dic = {tnode_id_map[nid]: msh.GetNodeXYZ(nid) for nid in tnids}
+        def coord_shift(x,y): 
+            l = self.length
+            return [(x+l)/(2*l),(y+l)/(2*l)]
+        tuv_dic = {tnode_id_map[nid]: coord_shift(*msh.GetNodeXYZ(nid)[:2]) for nid in tnids}
         tnormal_dic = {tnode_id_map[nid]: compute_weighted_normal(msh,nid) for nid in tnids}
         
         dic['top_verts'] = [tvert_dic[k] for k in range(len(tnids))]
         dic['top_normals'] = [tnormal_dic[k] for k in range(len(tnids))]
         dic['top_order'] = reduce(lambda a,b: a+b,[msh.GetElemNodes(fid) for fid in self.t_group.GetIDs()])
         dic['top_order'] = [tnode_id_map[nid] for nid in dic['top_order']]
+        dic['top_uv'] = [tuv_dic[k] for k in range(len(tnids))]
         
         dic['length'] = self.length
         dic['unit_height'] = self.unit_height
@@ -160,12 +165,19 @@ class Hexagon:
             json.dump(dic,f,indent=4)
         return dic
         
-        
-            
+min_h = -5
+max_h = 10
+hrange = max_h - min_h
+unit_length = 1.0
+unit_height = 0.5
+path = os.path.expanduser("~/Games/Godot/UltraMek/UltraMekGodot/assets/hexes")
+
 if __name__ == "__main__":
-    hexa = Hexagon(1.0,5)
-    hexa.create_hex_in_local_coords()
-    hexa.publish()
-    hexa.create_base_mesh()
-    groups = hexa.extrude_base_mesh(True)
-    hexa.to_json("/home/maldun/Games/Godot/UltraMek/hexa.json")
+    for k in range(hrange):
+        hexa = Hexagon(unit_length,k+1,unit_height=unit_height)
+        hexa.create_hex_in_local_coords()
+        hexa.publish()
+        hexa.create_base_mesh()
+        groups = hexa.extrude_base_mesh(True)
+        fname = os.path.join(path,f"hexa_h{k-5}.json")
+        hexa.to_json(fname)
