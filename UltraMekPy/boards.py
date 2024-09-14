@@ -61,7 +61,7 @@ class Board:
     HEX_IDENTIFIER = "hex"
     END_IDENTIFIER = "end"
 
-    LAYERS = {"wood","heights","rough","sand","swamp","water","planted_fields","foliage_elev",
+    LAYERS = {"woods","heights","rough","sand","swamp","water","planted_fields","foliage_elev",
                   "tile_type"}
     
     def __init__(self,filename):
