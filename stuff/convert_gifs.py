@@ -2,7 +2,7 @@
 import os 
 from PIL import Image 
 
-path = os.path.expanduser("~/Games/Godot/UltraMek/UltraMekGodot/assets/hexes/snow/")
+path = os.path.expanduser("~/Games/Godot/UltraMek/UltraMekGodot/assets/hexes/road/")
 files = os.listdir(path)
 format1 = ".gif"
 format2 = ".png"

@@ -145,7 +145,8 @@ class Hexagon:
         tvert_dic = {tnode_id_map[nid]: msh.GetNodeXYZ(nid) for nid in tnids}
         def coord_shift(x,y): 
             l = self.length
-            return [(x+l)/(2*l),(y+l)/(2*l)]
+            # v coordinate has to be mirrored due to inverted textures
+            return [(x+l)/(2*l),1-(y+l)/(2*l)] 
         tuv_dic = {tnode_id_map[nid]: coord_shift(*msh.GetNodeXYZ(nid)[:2]) for nid in tnids}
         tnormal_dic = {tnode_id_map[nid]: compute_weighted_normal(msh,nid) for nid in tnids}
         

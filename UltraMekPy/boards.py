@@ -43,8 +43,10 @@ class Tile:
     def get_property(self, prop):
         for p in self.properties:
             if prop == p[0]:
+                if prop == "road":
+                    return p[1:3]
                 return p[1]
-        return 0
+        return [0,0] if prop == "road" else 0
 
 class Board:
     """
@@ -62,7 +64,7 @@ class Board:
     END_IDENTIFIER = "end"
 
     LAYERS = {"woods","heights","rough","sand","swamp","water","planted_fields","foliage_elev",
-                  "tile_type"}
+                  "tile_type","road"}
     
     def __init__(self,filename):
         if not os.path.exists(filename):
