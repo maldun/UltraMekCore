@@ -1,6 +1,9 @@
 #!/bin/bash
 scons
 
+cp "UltraMekCPP/_ultramek.so" "UltraMekPy/_ultramek.so"
+cp "UltraMekCPP/ultramek.py" "UltraMekPy/ultramek.py"
+
 export LD_LIBRARY_PATH=$(pwd)/UltraMekCPP:$LD_LIBRARY_PATH
 
 printf "\n"
