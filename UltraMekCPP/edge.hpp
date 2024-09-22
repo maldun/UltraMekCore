@@ -1,4 +1,4 @@
-// unittests.hh - cpp unittests header for Ultramek (compatible with MegaMek)
+// edge.hpp - cpp edge class header for Ultramek (compatible with MegaMek)
 
 // Copyright © 2024 Stefan H. Reiterer.
 // stefan.harald.reiterer@gmail.com 
@@ -18,20 +18,30 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef UT_H
-#define UT_H
-#include<vector>
-#include<map>
-#include<iostream>
-#include<string>
-#include "../UltraMekCPP/ultramek.hpp"
-#include "../UltraMekCPP/geometry.hpp"
-#include "../UltraMekCPP/node.hpp"
-#include "../UltraMekCPP/edge.hpp"
-#include "../UltraMekCPP/graph.hpp"
 
-using namespace std;
+#ifndef __EDGE_H__
+#define __EDGE_H__
+#include "node.hpp"
+#include <string>
 
-int main(int , char**);
+class Edge
+{
+  Node start;
+  Node end;
+  double weight;
+  string DELIMITER = ",";
+  public:
+    Edge ();
+    Edge (const Node,const Node, double);
+    Edge (const string);
+    int getStartID();
+    int getEndID();
+    Node getStartNode();
+    Node getEndNode();
+    double getWeight();
+    string toString() const; 
+};
 
-#endif
+int edge_tests();
+
+#endif // __EDGE_H__

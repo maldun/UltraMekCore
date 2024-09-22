@@ -3,7 +3,8 @@ import os
 import shutil
 
 cpp = Environment(CCFLAGS=['-Wall'],LIBPATH=['UltraMekCPP'])
-cfiles = ["test/unittests.cpp","UltraMekCPP/helpers.cpp","UltraMekCPP/geometry.cpp","UltraMekCPP/ultramek.cpp"]
+cfiles = ["test/unittests.cpp","UltraMekCPP/helpers.cpp","UltraMekCPP/geometry.cpp","UltraMekCPP/ultramek.cpp","UltraMekCPP/node.cpp","UltraMekCPP/edge.cpp",
+          "UltraMekCPP/graph.cpp"]
 hfiles = [f.replace(".cpp",".hpp") for f in cfiles]
 
 cpp.SharedLibrary("UltraMekCPP/ultramek",cfiles,include=hfiles)

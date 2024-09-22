@@ -27,6 +27,21 @@ int main(int argc, char *argv[])
       cout << "Geometry Tests failed" << endl;
       throw runtime_error("Error: Geometry Test Failed!");
     }
+    if(node_tests() != 0)
+    {
+      cout << "Node Tests failed" << endl;
+      throw runtime_error("Error: Node Test Failed!");
+    }
+    if(edge_tests() != 0)
+    {
+      cout << "Edge Tests failed" << endl;
+      throw runtime_error("Error: Edge Test Failed!");
+    }
+    if(graph_tests() != 0)
+    {
+      cout << "Graph Tests failed" << endl;
+      throw runtime_error("Error: Graph Test Failed!");
+    }
     if(ultra_mek_tests() != 0)
     {
       cout << "UltraMek Tests failed" << endl;

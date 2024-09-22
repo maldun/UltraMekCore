@@ -1,4 +1,4 @@
-// unittests.hh - cpp unittests header for Ultramek (compatible with MegaMek)
+// node.hpp - cpp node class header for Ultramek (compatible with MegaMek)
 
 // Copyright © 2024 Stefan H. Reiterer.
 // stefan.harald.reiterer@gmail.com 
@@ -18,20 +18,26 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef UT_H
-#define UT_H
-#include<vector>
-#include<map>
-#include<iostream>
-#include<string>
-#include "../UltraMekCPP/ultramek.hpp"
-#include "../UltraMekCPP/geometry.hpp"
-#include "../UltraMekCPP/node.hpp"
-#include "../UltraMekCPP/edge.hpp"
-#include "../UltraMekCPP/graph.hpp"
 
+#ifndef __NODE_H__
+#define __NODE_H__
+#include <string>
+#include<iostream>
 using namespace std;
 
-int main(int , char**);
+class Node
+{
+    int ID;
+  public:
+    Node ();
+    Node (const int);
+    Node (const string);
+    Node (const Node&);
+    int getID() const;
+    bool operator< (const Node&);
+    string toString() const;
+};
 
-#endif
+int node_tests();
+
+#endif //__NODE_H__
