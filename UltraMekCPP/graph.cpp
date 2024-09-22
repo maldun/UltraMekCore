@@ -619,6 +619,23 @@ int testDijkstra()
   return 0;
 }
 
+int testShortestPath()
+{
+  Graph graph = Graph(TEST_FOLDER + "testgraph1.txt");
+  Node start = Node(1);
+  Node end = Node(3);
+  vector<int> result = graph.shortest_path(start,end);
+  vector<int> expected = {1,3,5};
+  for(long unsigned int i=0;i < result.size();i++)
+  {
+      if(expected[i] != result[i])
+      {
+         return 1; 
+      }
+  }
+  return 0;
+  
+}
 int graph_tests()
 {
   if(testGraphCreation() != 0)
@@ -634,6 +651,8 @@ int graph_tests()
   if(testHasNode() != 0)
    {return 1;}
   if(testDijkstra() != 0)
+   {return 1;}
+  if(testShortestPath() != 0)
    {return 1;}
 
   cout << "Graph tests passed! " << endl;
