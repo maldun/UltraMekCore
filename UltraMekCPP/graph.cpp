@@ -403,6 +403,17 @@ vector<int> Graph::shortest_path_ids(Node start, Node end)
    return shortest_path_dijkstra(*this,start,end); 
 }
 
+vector<Node> Graph::shortest_path(Node start, Node end)
+{
+   vector<int> path_ids = this->shortest_path_ids(start,end);
+   vector<Node> path;
+   for(int id : path_ids)
+   {
+     path.push_back(this->getNodeByID(id)); 
+   }
+   return path; 
+}
+
 // Graph tests
 Node NIL = Node();
 Edge NILE = Edge(NIL,NIL,-1.0);
@@ -764,6 +775,16 @@ int testShortestPath()
          return 1; 
       }
   }
+  vector<Node> resultn = graph.shortest_path(start,end);
+  for(long unsigned int i=0;i < result.size();i++)
+  {
+      if(expected[i] != resultn[i].getID())
+      {
+         return 1; 
+      }
+  }
+  
+  
   return 0;
   
 }

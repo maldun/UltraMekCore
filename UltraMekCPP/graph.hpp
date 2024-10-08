@@ -53,10 +53,10 @@ class Graph
 	bool hasNode(int);
 	Edge getEdge(Node,Node);
     vector<int> shortest_path_ids(Node, Node);
+    vector<Node> shortest_path(Node, Node);
     Node getNodeByPos(const int,const int);
     Node getNodeByID(const int);
     int createBoardEdge(Node,double**,int,int,int,int);
-    vector<Node> shortest_path(Node, Node);
     
 };
 
