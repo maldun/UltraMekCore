@@ -45,6 +45,73 @@ Graph::Graph(vector<Node> nodess, vector<Edge> edgess)
   nr_edges = edgess.size();
 }
 
+Node Graph::getNodeByPos(const int x,const int y)
+{
+  for(Node n: nodes)
+  {
+     if(n.getPosX()==x and n.getPosY()==y)
+     {
+       return n;
+     }
+  }
+  return Node();
+}
+
+Node Graph::getNodeByID(const int id)
+{
+  for(Node n: nodes)
+  {
+     if(n.getID()==id)
+     {
+       return n;
+     }
+  }
+  return Node();
+}
+
+int Graph::createBoardEdge(Node curr,double **weights,int i, int j, int shift_x,int shift_y)
+{
+  Node m2 = this->getNodeByPos(i+shift_x,j+shift_y);
+  if(m2.getID() != -1)
+  {
+     Edge e1 = Edge(curr,m2,weights[i+shift_x][j+shift_y]);
+     edges.push_back(e1);
+     return 0;
+  }
+  return 1;
+}
+
+Graph::Graph(const int dim_x, const int dim_y, double **weights)
+{
+    //vector<Node> nodes;
+    //vector<Edge> edges;
+    
+    for(int i=0;i<dim_x;i++)
+    {
+      for(int j=0;j<dim_y;j++)
+      {
+         Node n = Node(i*max_board_size + j,i,j);
+         nodes.push_back(n);
+      }
+    }
+
+    for(int i=0;i<dim_x;i++)
+    {
+      for(int j=0;j<dim_y;j++)
+      {
+         Node m = this->getNodeByPos(i,j);
+         this->createBoardEdge(m,weights,i,j,0,-1);
+         this->createBoardEdge(m,weights,i,j,-1,0);
+         this->createBoardEdge(m,weights,i,j,1,0);
+         this->createBoardEdge(m,weights,i,j,-1,1);
+         this->createBoardEdge(m,weights,i,j,0,1);
+         this->createBoardEdge(m,weights,i,j,1,1);
+      }
+    }
+}
+
+
+
 int Graph::parseNrObjects(string filename, string key, string end_key)
 {
   string line;
@@ -331,7 +398,7 @@ vector<int> shortest_path_dijkstra(Graph graph, Node start, Node end)
 	return(path);
 }
 
-vector<int> Graph::shortest_path(Node start, Node end)
+vector<int> Graph::shortest_path_ids(Node start, Node end)
 {
    return shortest_path_dijkstra(*this,start,end); 
 }
@@ -411,6 +478,32 @@ int testGraphCreation()
     cout << "Graph Number of Edges not correct!" << endl;
     return 1;
   }
+  
+  int dim_x = 3;
+  int dim_y = 3;
+  double **weights = new double*[dim_x];
+  for(int k=0;k<dim_x;k++)
+  {
+    weights[k] = new double[dim_y];
+  }
+  double counter = 0;
+  for(int i=0;i<dim_x;i++)
+  {
+    for(int j=0;j<dim_y;j++)
+    {
+      weights[i][j] = counter;
+      counter+=1.0;
+    }
+  }
+  Graph graph2 = Graph(dim_x,dim_y,weights);
+  vector<Node> nodes2 = graph2.getNodes();
+  vector<Edge> edges2 = graph2.getEdges();
+  if(nodes2[0].getID() != 0 or edges2[0].getStartNode().getID()!=0 or graph2.getNodeByPos(0,1).getID() != edges2[1].getEndID() or graph2.getNodeByPos(1,0).getID() != edges2[0].getEndID())
+  {
+    cout << "Graph From Board not correct!" << endl;
+    return 1;
+  }
+  
   // All tests passed
   //cout << "Graph Creation Successful!" << endl;
   return 0;
@@ -574,6 +667,44 @@ int testHasNode()
   return 0;
 }
 
+int testGetNodeFromPos()
+{
+   Node n = Node(0,1,1);
+   Node m = Node(1,1,2);
+   Edge e = Edge(n,m,0.0);
+   vector<Node> nn{n,m};
+   vector<Edge> ee{e};
+   Graph g = Graph(nn,ee);
+   
+   
+   if(!(g.getNodeByPos(1,1).getID()==0 && g.getNodeByPos(1,2).getID()==1 && g.getNodeByPos(3,1).getID()==-1))
+  {
+	cout << "GetNodeFromPos Test failed!" << endl;
+	return 1;
+  }
+   
+   return 0;
+}
+
+int testGetNodeFromID()
+{
+   Node n = Node(0,1,1);
+   Node m = Node(1,1,2);
+   Edge e = Edge(n,m,0.0);
+   vector<Node> nn{n,m};
+   vector<Edge> ee{e};
+   Graph g = Graph(nn,ee);
+   
+   
+   if(!(g.getNodeByID(0).getID()==0 && g.getNodeByID(1).getID()==1 && g.getNodeByID(3).getID()==-1))
+  {
+	cout << "GetNodeFromID Test failed!" << endl;
+	return 1;
+  }
+   
+   return 0;
+}
+
 int testDijkstra()
 {
 	
@@ -624,7 +755,7 @@ int testShortestPath()
   Graph graph = Graph(TEST_FOLDER + "testgraph1.txt");
   Node start = Node(1);
   Node end = Node(3);
-  vector<int> result = graph.shortest_path(start,end);
+  vector<int> result = graph.shortest_path_ids(start,end);
   vector<int> expected = {1,3,5};
   for(long unsigned int i=0;i < result.size();i++)
   {
@@ -654,6 +785,11 @@ int graph_tests()
    {return 1;}
   if(testShortestPath() != 0)
    {return 1;}
+  if(testGetNodeFromPos() != 0)
+   {return 1;}
+  if(testGetNodeFromID() != 0)
+   {return 1;}
+   
 
   cout << "Graph tests passed! " << endl;
   return 0;

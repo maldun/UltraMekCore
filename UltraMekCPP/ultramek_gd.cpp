@@ -106,6 +106,11 @@ double UltraMekGD::doubling(double x)
   return result;
 }
 
+double UltraMekGD::compute_euclidean(double x,double y)
+{
+    return mek.compute_euclidean(x,y);
+}
+
 void UltraMekGD::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("get_hex_diameter"), &UltraMekGD::get_hex_diameter);
@@ -114,6 +119,7 @@ void UltraMekGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("set_unit_height", "value"), &UltraMekGD::set_unit_height,
 			 DEFVAL(1));
     ClassDB::bind_method(D_METHOD("doubling", "value"), &UltraMekGD::doubling, DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("compute_euclidean", "x", "y"), &UltraMekGD::compute_euclidean, DEFVAL(1),DEFVAL(1));
     ClassDB::bind_method(D_METHOD("get_unit_length"), &UltraMekGD::get_unit_length);
     ClassDB::bind_method(D_METHOD("get_unit_height"), &UltraMekGD::get_unit_height);
     ClassDB::bind_method(D_METHOD("create_grid_centers", "dim_x", "dim_y"),

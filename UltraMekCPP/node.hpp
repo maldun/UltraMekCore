@@ -28,12 +28,17 @@ using namespace std;
 class Node
 {
     int ID;
+    int pos_x = -1;
+    int pos_y = -1;
   public:
     Node ();
     Node (const int);
+    Node (const int,const int,const int);
     Node (const string);
     Node (const Node&);
     int getID() const;
+    int getPosX() const;
+    int getPosY() const;
     bool operator< (const Node&);
     string toString() const;
 };

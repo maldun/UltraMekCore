@@ -48,6 +48,7 @@ public:
 
     double get_hex_diameter();
     double doubling(double);
+    double compute_euclidean(double,double);
     void set_unit_length(double);
     void set_unit_height(double);
     double get_unit_length();

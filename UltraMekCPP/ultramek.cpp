@@ -21,6 +21,8 @@
 
 #include "ultramek.hpp"
 #include "geometry.hpp"
+#include <vector>
+#include <cmath>
 
 UltraMek::UltraMek()
 {
@@ -52,6 +54,12 @@ int *UltraMek::create_vertex_order()
   return order;     
 }
 
+// for test purposes
+double UltraMek::compute_euclidean(double x,double y)
+{
+  vector<double> vec{x,y};
+  return sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
+}
 
 //////////////////////////////////////// TESTS /////////////////////////////////////////////////////
 
@@ -62,6 +70,13 @@ int test_doubling()
   if(mek.doubling(2.0) != 4.0){ return 1;}
 
   return 0;
+}
+
+int test_compute_euclidean()
+{
+   UltraMek mek = UltraMek();
+   if(mek.compute_euclidean(3.0,4.0) != 5.0){ return 1;}
+   return 0;
 }
 
 int test_unit_length()
@@ -117,6 +132,12 @@ int ultra_mek_tests()
   if(test_unit_height()!=0)
   {
     cout << "Test unit_height failed!" << endl;
+    return 1;
+  }
+  
+  if(test_compute_euclidean()!=0)
+  {
+    cout << "Test compute euclidean failed!" << endl;
     return 1;
   }
   

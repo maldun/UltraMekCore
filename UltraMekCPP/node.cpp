@@ -34,6 +34,13 @@ Node::Node(const int id)
   ID = id;
 }
 
+Node::Node (const int id,const int x,const int y)
+{
+  ID = id;
+  pos_x = x;
+  pos_y = y;
+}
+
 Node::Node(const string ids)
 {
   stringstream id (ids);
@@ -43,11 +50,22 @@ Node::Node(const string ids)
 Node::Node(const Node &n)
 {
   ID = n.ID;
+  pos_x = n.pos_x;
+  pos_y = n.pos_y;
 }
 
 int Node::getID() const
 {
   return ID;
+}
+
+int Node::getPosX() const
+{
+  return pos_x;
+}
+int Node::getPosY() const
+{
+  return pos_y;
 }
 
 bool Node::operator< (const Node& n)
@@ -77,6 +95,12 @@ int testNodeCreation()
       return 1;
    }
 
+   Node node3 = Node(1,2,3);
+   if(node3.getID()!=1 and node3.getPosX() !=2 and node3.getPosY() !=3)
+   {
+      cout << "Node Creation from coords Failed! " << endl;
+      return 1;
+   }
    //cout << "Node Creation Success! " << endl;
    return 0;
 }

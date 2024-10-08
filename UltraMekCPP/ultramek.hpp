@@ -41,6 +41,7 @@ class UltraMek
      double ***create_grid_centers(int,int);
      double **create_hex_vertices(double,double,double,double);
      int *create_vertex_order();
+     double compute_euclidean(double,double);
 };
 
 inline double UltraMek::doubling(double x) {return 2*x;}
