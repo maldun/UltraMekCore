@@ -33,7 +33,6 @@ class Graph
 {
   long unsigned int nr_nodes;
   long unsigned int nr_edges;
-  const unsigned int max_board_size = 10000;
   vector<Node>nodes;
   vector<Edge>edges;
   string NODE_KEY = "Nodes:";
@@ -43,6 +42,8 @@ class Graph
     int parseNrObjects(string, string, string);
     bool isConsistent();
     Graph(const string);
+    Graph();
+    ~Graph();
     Graph(const int,const int,double**);
     vector<Node> getNodes();
     vector<Edge> getEdges();

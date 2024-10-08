@@ -23,11 +23,13 @@
 
 #include "helpers.hpp"
 #include "geometry.hpp"
+#include "graph.hpp"
 
 class UltraMek
 {
   double unit_length;
   double unit_height;
+  Graph board;
   
   public:
     UltraMek();
@@ -35,6 +37,7 @@ class UltraMek
     double doubling(double); // for test purposes ...
      void set_unit_length(double);
      void set_unit_height(double);
+     void create_board_graph(int,int,double**);
      double get_unit_length();
      double get_unit_height();
      double get_hex_diameter();
@@ -42,6 +45,7 @@ class UltraMek
      double **create_hex_vertices(double,double,double,double);
      int *create_vertex_order();
      double compute_euclidean(double,double);
+     int *compute_shortest_walk_ids(int,int);
 };
 
 inline double UltraMek::doubling(double x) {return 2*x;}

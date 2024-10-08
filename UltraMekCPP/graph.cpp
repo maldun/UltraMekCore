@@ -45,6 +45,22 @@ Graph::Graph(vector<Node> nodess, vector<Edge> edgess)
   nr_edges = edgess.size();
 }
 
+Graph::Graph()
+{
+  nodes = vector<Node>{};
+  edges = vector<Edge>{};
+  nr_nodes = 0;
+  nr_edges = 0;
+}
+
+Graph::~Graph()
+{
+  nodes = vector<Node>();  
+  edges = vector<Edge>();  
+  nr_nodes = 0;
+  nr_edges = 0;
+}
+
 Node Graph::getNodeByPos(const int x,const int y)
 {
   for(Node n: nodes)
@@ -83,15 +99,17 @@ int Graph::createBoardEdge(Node curr,double **weights,int i, int j, int shift_x,
 
 Graph::Graph(const int dim_x, const int dim_y, double **weights)
 {
-    //vector<Node> nodes;
-    //vector<Edge> edges;
+    nodes = vector<Node>();
+    edges = vector<Edge>();
     
+    int counter = 0;
     for(int i=0;i<dim_x;i++)
     {
       for(int j=0;j<dim_y;j++)
       {
-         Node n = Node(i*max_board_size + j,i,j);
+         Node n = Node(counter,i,j);
          nodes.push_back(n);
+         counter++;
       }
     }
 
@@ -512,6 +530,18 @@ int testGraphCreation()
   if(nodes2[0].getID() != 0 or edges2[0].getStartNode().getID()!=0 or graph2.getNodeByPos(0,1).getID() != edges2[1].getEndID() or graph2.getNodeByPos(1,0).getID() != edges2[0].getEndID())
   {
     cout << "Graph From Board not correct!" << endl;
+    return 1;
+  }
+  if(graph2.isConsistent()==false)
+  {
+    cout << "Graph From Board not consistent!" << endl;
+    return 1;
+  }
+  
+  Graph graph3 = Graph();
+  if(graph3.getNodes().size()!=0 or graph3.getEdges().size()!=0)
+  {
+    cout << "Empty Graph creation not correct!" << endl;
     return 1;
   }
   

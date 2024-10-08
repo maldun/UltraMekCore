@@ -21,6 +21,7 @@
 
 #include "ultramek.hpp"
 #include "geometry.hpp"
+#include "graph.hpp"
 #include <vector>
 #include <cmath>
 
@@ -28,6 +29,7 @@ UltraMek::UltraMek()
 {
   unit_length = 1.0;
   unit_height = 1.0;
+  board = Graph();
 }
 
 UltraMek::~UltraMek()
@@ -59,6 +61,27 @@ double UltraMek::compute_euclidean(double x,double y)
 {
   vector<double> vec{x,y};
   return sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
+}
+
+void UltraMek::create_board_graph(int dim_x,int dim_y,double** weights)
+{
+   board = Graph(dim_x,dim_y,weights);
+}
+
+int *UltraMek::compute_shortest_walk_ids(int start_id,int target_id)
+{
+  
+   cout << "Board consistent: " << board.isConsistent() << endl;
+   Node s = board.getNodeByID(start_id);
+   Node t = board.getNodeByID(target_id);
+   
+   vector<int> path = board.shortest_path_ids(s,t);
+   int *result = new int[path.size()];
+   for(long unsigned int k=0;k<path.size();k++)
+   {
+     result[k] = path[k];
+   }
+   return result;
 }
 
 //////////////////////////////////////// TESTS /////////////////////////////////////////////////////
@@ -109,6 +132,53 @@ int test_hex_diameter()
   return 0;
 }
 
+int test_graph_creation()
+{
+  UltraMek mek = UltraMek();
+  int dim_x = 3;
+  int dim_y = 3;
+  double **weights = new double*[dim_x];
+  for(int k=0;k<dim_x;k++)
+  {
+    weights[k] = new double[dim_y];
+  }
+  double counter = 0;
+  for(int i=0;i<dim_x;i++)
+  {
+    for(int j=0;j<dim_y;j++)
+    {
+      weights[i][j] = counter;
+      counter+=1.0;
+    }
+  }
+  mek.create_board_graph(dim_x,dim_y,weights);
+  return 0;
+}
+
+int test_compute_shortest_walk_ids()
+{
+  UltraMek mek = UltraMek();
+  int dim_x = 3;
+  int dim_y = 3;
+  double **weights = new double*[dim_x];
+  for(int k=0;k<dim_x;k++)
+  {
+    weights[k] = new double[dim_y];
+  }
+  double counter = 0;
+  for(int i=0;i<dim_x;i++)
+  {
+    for(int j=0;j<dim_y;j++)
+    {
+      weights[i][j] = counter;
+      counter+=1.0;
+    }
+  }
+  mek.create_board_graph(dim_x,dim_y,weights);
+  mek.compute_shortest_walk_ids(0,1);
+  return 0;
+}
+
 int ultra_mek_tests()
 {
   if(test_doubling()!=0)
@@ -138,6 +208,17 @@ int ultra_mek_tests()
   if(test_compute_euclidean()!=0)
   {
     cout << "Test compute euclidean failed!" << endl;
+    return 1;
+  }
+    if(test_graph_creation()!=0)
+  {
+    cout << "Test graph creation failed!" << endl;
+    return 1;
+  }
+  
+  if(test_compute_shortest_walk_ids()!=0)
+  {
+    cout << "Test path finding (ids) failed!" << endl;
     return 1;
   }
   
