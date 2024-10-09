@@ -111,6 +111,34 @@ double UltraMekGD::compute_euclidean(double x,double y)
     return mek.compute_euclidean(x,y);
 }
 
+void UltraMekGD::create_board_graph(int dim_x,int dim_y,TypedArray<double> weights)
+{
+  double **wmatrix = new double*[dim_x];
+  for(int i=0;i<dim_x;i++)
+  {
+    wmatrix[i] = new double[dim_y];
+    for(int j=0;j<dim_y;j++)
+    {
+      wmatrix[i][j] = weights[i + dim_x*j];
+    }
+  }
+  mek.create_board_graph(dim_x,dim_y,wmatrix); 
+}
+
+Array UltraMekGD::compute_shortest_walk_ids(int start_id,int target_id)
+{
+  Array path;
+  path.push_back(start_id);
+  int *path_arr = mek.compute_shortest_walk_ids(start_id,target_id);
+  int len = sizeof(path_arr)/sizeof(int);
+  for(int i=0;i<len;i++)
+  {
+    path.push_back(path_arr[i]); 
+  }
+  return path;
+  
+}
+
 void UltraMekGD::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("get_hex_diameter"), &UltraMekGD::get_hex_diameter);
@@ -128,4 +156,7 @@ void UltraMekGD::_bind_methods()
 			 &UltraMekGD::create_hex_vertices,
 			 DEFVAL(0),DEFVAL(0),DEFVAL(1),DEFVAL(1));
     ClassDB::bind_method(D_METHOD("create_vertex_order"), &UltraMekGD::create_vertex_order);
+    ClassDB::bind_method(D_METHOD("create_board_graph", "dim_x", "dim_y", "weights"),
+			 &UltraMekGD::create_board_graph, DEFVAL(1),DEFVAL(1),DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("compute_shortest_walk_ids", "start_id", "end_id"), &UltraMekGD::compute_shortest_walk_ids, DEFVAL(1),DEFVAL(1));
 }

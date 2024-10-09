@@ -107,7 +107,7 @@ Graph::Graph(const int dim_x, const int dim_y, double **weights)
     {
       for(int j=0;j<dim_y;j++)
       {
-         Node n = Node(counter,i,j);
+         Node n = Node(counter,j,i);
          nodes.push_back(n);
          counter++;
       }
@@ -118,14 +118,36 @@ Graph::Graph(const int dim_x, const int dim_y, double **weights)
       for(int j=0;j<dim_y;j++)
       {
          Node m = this->getNodeByPos(i,j);
-         this->createBoardEdge(m,weights,i,j,0,-1);
-         this->createBoardEdge(m,weights,i,j,-1,0);
-         this->createBoardEdge(m,weights,i,j,1,0);
-         this->createBoardEdge(m,weights,i,j,-1,1);
-         this->createBoardEdge(m,weights,i,j,0,1);
-         this->createBoardEdge(m,weights,i,j,1,1);
+         if(i%2!=0)
+         {
+           this->createBoardEdge(m,weights,i,j,0,-1);
+           this->createBoardEdge(m,weights,i,j,-1,0);
+           this->createBoardEdge(m,weights,i,j,1,0);
+           this->createBoardEdge(m,weights,i,j,-1,1);
+           this->createBoardEdge(m,weights,i,j,0,1);
+           this->createBoardEdge(m,weights,i,j,1,1);
+         }
+         else
+         {
+           this->createBoardEdge(m,weights,i,j,0,1);
+           this->createBoardEdge(m,weights,i,j,-1,0);
+           this->createBoardEdge(m,weights,i,j,1,0);
+           this->createBoardEdge(m,weights,i,j,-1,-1);
+           this->createBoardEdge(m,weights,i,j,0,-1);
+           this->createBoardEdge(m,weights,i,j,1,-1);
+         }
       }
     }
+    nr_nodes = nodes.size();
+    nr_edges = edges.size();
+    // for(Node node: nodes)
+    // {
+    //   cout << "Node: " << node.getID() << ", (" << node.getPosX() << "," << node.getPosY() <<  ")" << endl;
+    // }
+    // for(Edge edge: edges)
+    // {
+    //   cout << "Edge: (" << edge.getStartID() << "," << edge.getEndID() << ")" << endl;
+    // }
 }
 
 
@@ -290,11 +312,10 @@ bool Graph::isConsistent()
   for(long unsigned int i=0; i < nr_nodes;i++)
   {
 	  if(nodes[i].getID() < 0)
-	  {
+	  {   
 		  return false;
 	  }
   }
-  
   return true;
 }
 
@@ -527,10 +548,44 @@ int testGraphCreation()
   Graph graph2 = Graph(dim_x,dim_y,weights);
   vector<Node> nodes2 = graph2.getNodes();
   vector<Edge> edges2 = graph2.getEdges();
-  if(nodes2[0].getID() != 0 or edges2[0].getStartNode().getID()!=0 or graph2.getNodeByPos(0,1).getID() != edges2[1].getEndID() or graph2.getNodeByPos(1,0).getID() != edges2[0].getEndID())
+  if(nodes2[0].getID() != 0 or edges2[0].getStartNode().getID()!=0 or graph2.getNodeByPos(0,1).getID() != edges2[0].getEndID() or graph2.getNodeByPos(0,1).getID() != edges2[0].getEndID())
   {
     cout << "Graph From Board not correct!" << endl;
     return 1;
+  }
+  if(graph2.getNodeByPos(0,1).getID() != 3 or graph2.getNodeByPos(1,1).getID() != 4)
+  {
+    cout << "Graph From Board not correct!" << endl;
+    return 1;
+  }
+  int count0 = 0;
+  int count3 = 0;
+  int count4 = 0;
+  int count6 = 0;
+  
+  for(Edge edge: graph2.getEdges())
+  {
+     if(edge.getStartID() == 0)
+     {
+        count0++;
+     }
+     if(edge.getStartID() == 3)
+     {
+        count3++;
+     }
+     if(edge.getStartID() == 4)
+     {
+        count4++;
+     }
+     if(edge.getStartID() == 6)
+     {
+        count6++;
+     }
+  }
+  if(count0 != 2 or count3 != 4 or count4 != 6 or count6 !=3)
+  {
+    cout << "Graph From Board not correct!" << endl;
+    return 1; 
   }
   if(graph2.isConsistent()==false)
   {

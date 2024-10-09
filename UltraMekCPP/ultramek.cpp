@@ -24,6 +24,7 @@
 #include "graph.hpp"
 #include <vector>
 #include <cmath>
+#include <array>
 
 UltraMek::UltraMek()
 {
@@ -71,15 +72,22 @@ void UltraMek::create_board_graph(int dim_x,int dim_y,double** weights)
 int *UltraMek::compute_shortest_walk_ids(int start_id,int target_id)
 {
   
-   cout << "Board consistent: " << board.isConsistent() << endl;
    Node s = board.getNodeByID(start_id);
+   if(s.getID()==-1)
+   {
+      return {0}; 
+   }
    Node t = board.getNodeByID(target_id);
-   
+   if(t.getID()==-1)
+   {
+      return {0}; 
+   }
    vector<int> path = board.shortest_path_ids(s,t);
-   int *result = new int[path.size()];
+   int *result = new int[path.size()+1];
+   result[0] = path.size();
    for(long unsigned int k=0;k<path.size();k++)
    {
-     result[k] = path[k];
+     result[k+1] = path[k];
    }
    return result;
 }
@@ -175,7 +183,11 @@ int test_compute_shortest_walk_ids()
     }
   }
   mek.create_board_graph(dim_x,dim_y,weights);
-  mek.compute_shortest_walk_ids(0,1);
+  int *path = mek.compute_shortest_walk_ids(0,8);
+  for(int i=0;i<path[0];i++)
+  {
+     cout << "Shortest Board Path: " << path[i+1] << endl; 
+  }
   return 0;
 }
 
