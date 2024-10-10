@@ -37,7 +37,7 @@ class UltraMek
     double doubling(double); // for test purposes ...
      void set_unit_length(double);
      void set_unit_height(double);
-     void create_board_graph(int,int,double**);
+     int **create_board_graph(int,int,double**);
      double get_unit_length();
      double get_unit_height();
      double get_hex_diameter();
@@ -46,6 +46,7 @@ class UltraMek
      int *create_vertex_order();
      double compute_euclidean(double,double);
      int *compute_shortest_walk_ids(int,int);
+     
 };
 
 inline double UltraMek::doubling(double x) {return 2*x;}

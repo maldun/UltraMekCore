@@ -64,9 +64,18 @@ double UltraMek::compute_euclidean(double x,double y)
   return sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 }
 
-void UltraMek::create_board_graph(int dim_x,int dim_y,double** weights)
+int **UltraMek::create_board_graph(int dim_x,int dim_y,double** weights)
 {
    board = Graph(dim_x,dim_y,weights);
+   int **id_matrix = initialize_2d_matrix<int>(dim_x, dim_y);
+   for(Node node : board.getNodes())
+   {
+      int X = node.getPosX(); 
+      int Y = node.getPosY();
+      id_matrix[X][Y] = node.getID();
+      
+   }
+   return id_matrix;
 }
 
 int *UltraMek::compute_shortest_walk_ids(int start_id,int target_id)

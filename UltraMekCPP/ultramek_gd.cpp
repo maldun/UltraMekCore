@@ -111,7 +111,7 @@ double UltraMekGD::compute_euclidean(double x,double y)
     return mek.compute_euclidean(x,y);
 }
 
-void UltraMekGD::create_board_graph(int dim_x,int dim_y,TypedArray<double> weights)
+Array UltraMekGD::create_board_graph(int dim_x,int dim_y,TypedArray<double> weights)
 {
   double **wmatrix = new double*[dim_x];
   for(int i=0;i<dim_x;i++)
@@ -122,7 +122,18 @@ void UltraMekGD::create_board_graph(int dim_x,int dim_y,TypedArray<double> weigh
       wmatrix[i][j] = weights[i + dim_x*j];
     }
   }
-  mek.create_board_graph(dim_x,dim_y,wmatrix); 
+  int **ids = mek.create_board_graph(dim_x,dim_y,wmatrix); 
+  Array result;
+  for(int i=0;i<dim_x;i++)
+  {
+    Array row = {};
+    for(int j=0;j<dim_y;j++)
+    {
+      row.push_back(ids[i][j]);
+    }
+    result.push_back(row);
+  }
+  return result;
 }
 
 Array UltraMekGD::compute_shortest_walk_ids(int start_id,int target_id)

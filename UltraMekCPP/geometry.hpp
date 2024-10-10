@@ -37,8 +37,40 @@ const int HEX = 6;
 double compute_hex_height(double);
 double compute_hex_sub_height(double);
 
-double **initialize_2d_matrix(unsigned int, unsigned int);
-double ***initialize_3d_matrix(unsigned int, unsigned int,unsigned int);
+template <typename Type = double>
+Type **initialize_2d_matrix(unsigned int dim_x,unsigned int dim_y)
+{
+   Type **matrix = new Type*[dim_x];
+   for(unsigned int i=0;i<dim_x;i++)
+   {
+      matrix[i] = new Type[dim_y];
+      for(unsigned int j=0;j<dim_y;j++)
+      {
+	 matrix[i][j] = 0;
+	 
+      }  
+   }
+   return matrix;
+}
+
+template <typename Type = double>
+Type ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned int dim_z)
+{
+   Type ***matrix = new Type**[dim_x];
+   for(unsigned int i=0;i<dim_x;i++)
+   {
+      matrix[i] = new Type*[dim_y];
+      for(unsigned int j=0;j<dim_y;j++)
+      {
+	 matrix[i][j] = new Type[dim_z];
+	 for(unsigned int k=0;k<dim_z;k++)
+	 {
+	   matrix[i][j][k] = 0.0;
+	 }
+      }  
+   }
+   return matrix;
+}
 
 double **compute_hex_vertices(double,double,double,double);
 double ***compute_grid_centers(unsigned int, unsigned int,double);

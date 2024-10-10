@@ -20,39 +20,40 @@
 
 #include "geometry.hpp"
 
-double **initialize_2d_matrix(unsigned int dim_x,unsigned int dim_y)
-{
-   double **matrix = new double*[dim_x];
-   for(unsigned int i=0;i<dim_x;i++)
-   {
-      matrix[i] = new double[dim_y];
-      for(unsigned int j=0;j<dim_y;j++)
-      {
-	 matrix[i][j] = 0;
-	 
-      }  
-   }
-   return matrix;
-}
+// template <typename T = double> 
+// T **initialize_2d_matrix(unsigned int dim_x,unsigned int dim_y)
+// {
+//    T **matrix = new T*[dim_x];
+//    for(unsigned int i=0;i<dim_x;i++)
+//    {
+//       matrix[i] = new T[dim_y];
+//       for(unsigned int j=0;j<dim_y;j++)
+//       {
+// 	 matrix[i][j] = 0;
+// 	 
+//       }  
+//    }
+//    return matrix;
+// }
 
 
-double ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned int dim_z)
-{
-   double ***matrix = new double**[dim_x];
-   for(unsigned int i=0;i<dim_x;i++)
-   {
-      matrix[i] = new double*[dim_y];
-      for(unsigned int j=0;j<dim_y;j++)
-      {
-	 matrix[i][j] = new double[dim_z];
-	 for(unsigned int k=0;k<dim_z;k++)
-	 {
-	   matrix[i][j][k] = 0.0;
-	 }
-      }  
-   }
-   return matrix;
-}
+// double ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned int dim_z)
+// {
+//    double ***matrix = new double**[dim_x];
+//    for(unsigned int i=0;i<dim_x;i++)
+//    {
+//       matrix[i] = new double*[dim_y];
+//       for(unsigned int j=0;j<dim_y;j++)
+//       {
+// 	 matrix[i][j] = new double[dim_z];
+// 	 for(unsigned int k=0;k<dim_z;k++)
+// 	 {
+// 	   matrix[i][j][k] = 0.0;
+// 	 }
+//       }  
+//    }
+//    return matrix;
+// }
 
 double ***compute_grid_centers(unsigned int dim_x, unsigned int dim_y, double unit_length)
 {

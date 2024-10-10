@@ -103,9 +103,9 @@ Graph::Graph(const int dim_x, const int dim_y, double **weights)
     edges = vector<Edge>();
     
     int counter = 0;
-    for(int i=0;i<dim_x;i++)
+    for(int i=0;i<dim_y;i++)
     {
-      for(int j=0;j<dim_y;j++)
+      for(int j=0;j<dim_x;j++)
       {
          Node n = Node(counter,j,i);
          nodes.push_back(n);

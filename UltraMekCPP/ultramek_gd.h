@@ -56,7 +56,7 @@ public:
     Array create_grid_centers(int,int);
     Array create_hex_vertices(double,double,double,double);
     Array create_vertex_order();
-    void create_board_graph(int,int,TypedArray<double>);
+    Array create_board_graph(int,int,TypedArray<double>);
     Array compute_shortest_walk_ids(int,int);
 };
 
