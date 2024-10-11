@@ -58,7 +58,7 @@ public:
     Array create_vertex_order();
     Array create_board_graph(int,int,TypedArray<double>);
     Array compute_shortest_walk_ids(int,int);
-    int point_in_hex_with_center(Vector2,Vector2,double);
+    int point_in_hex_with_center(Vector2,Vector2);
 };
 
 #endif //ULTRAMEK_GD_H
