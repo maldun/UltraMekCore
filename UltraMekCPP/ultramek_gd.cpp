@@ -70,6 +70,15 @@ Array UltraMekGD::create_grid_centers(int dim_x, int dim_y)
   return centers; 
 }
 
+int UltraMekGD::point_in_hex_with_center(Vector2 x,Vector2 center,double unit_length)
+{
+  double xp[2] = {0,0};
+  double cp[2] = {0,0};
+  xp[0]=x[0];xp[1]=x[1];
+  cp[0]=center[0];cp[1]=center[1];
+  return mek.point_in_hex_with_center(xp,cp,unit_length);
+}
+
 Array UltraMekGD::create_hex_vertices(double pos_x,double pos_y,double length)
 {
   Array verts;
@@ -170,4 +179,5 @@ void UltraMekGD::_bind_methods()
     ClassDB::bind_method(D_METHOD("create_board_graph", "dim_x", "dim_y", "weights"),
 			 &UltraMekGD::create_board_graph, DEFVAL(1),DEFVAL(1),DEFVAL(1));
     ClassDB::bind_method(D_METHOD("compute_shortest_walk_ids", "start_id", "end_id"), &UltraMekGD::compute_shortest_walk_ids, DEFVAL(1),DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("point_in_hex_with_center", "x", "center","unit_length"), &UltraMekGD::point_in_hex_with_center, DEFVAL(1),DEFVAL(1),DEFVAL(1));
 }
