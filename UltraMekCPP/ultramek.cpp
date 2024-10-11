@@ -45,9 +45,9 @@ double ***UltraMek::create_grid_centers(int dim_x, int dim_y)
   return matrix;
 }
 
-double **UltraMek::create_hex_vertices(double pos_x, double pos_y, double length, double height)
+double **UltraMek::create_hex_vertices(double pos_x, double pos_y, double length)
 {
-  double **matrix = compute_hex_vertices(pos_x,pos_y,length,height);
+  double **matrix = compute_hex_vertices(pos_x,pos_y,length);
   return matrix;     
 }
 
@@ -92,13 +92,19 @@ int *UltraMek::compute_shortest_walk_ids(int start_id,int target_id)
       return {0}; 
    }
    vector<int> path = board.shortest_path_ids(s,t);
-   int *result = new int[path.size()+1];
-   result[0] = path.size();
+   int *result = new int[path.size()+2];
+   result[0] = path.size()+1;
+   result[1] = s.getID();
    for(long unsigned int k=0;k<path.size();k++)
    {
-     result[k+1] = path[k];
+     result[k+2] = path[k];
    }
    return result;
+}
+
+int UltraMek::point_in_hex_with_center(double *x,double *center,double unit_length)
+{
+  return point_inside_hex_with_center(x,center,unit_length);
 }
 
 //////////////////////////////////////// TESTS /////////////////////////////////////////////////////
@@ -193,11 +199,76 @@ int test_compute_shortest_walk_ids()
   }
   mek.create_board_graph(dim_x,dim_y,weights);
   int *path = mek.compute_shortest_walk_ids(0,8);
+  int expected_path[4] = {0,3,4,8};
   for(int i=0;i<path[0];i++)
   {
-     cout << "Shortest Board Path: " << path[i+1] << endl; 
+    //cout << "Shortest Board Path: " << path[i+1] << endl; 
+    if(path[i+1]!=expected_path[i])
+    {
+      return 1; 
+    }
+  }
+  counter = 0;
+  for(int i=0;i<dim_x;i++)
+  {
+    for(int j=0;j<dim_y;j++)
+    {
+      weights[i][j] = counter;
+      counter+=1.0;
+    }
+  }
+  weights[1][1]=20;
+  int expected_path2[5] = {0,3,6,7,8};
+  mek.create_board_graph(dim_x,dim_y,weights);
+  path = mek.compute_shortest_walk_ids(0,8);
+  for(int i=0;i<path[0];i++)
+  {
+    //cout << "Shortest Board Path: " << path[i+1] << endl; 
+    if(path[i+1]!=expected_path2[i])
+    {
+      return 1; 
+    }
+  }
+  counter = 0;
+  for(int i=0;i<dim_x;i++)
+  {
+    for(int j=0;j<dim_y;j++)
+    {
+      weights[j][i] = counter;
+      counter+=1.0;
+    }
+  }
+  weights[1][1]=20;
+  int expected_path3[4] = {0,1,5,8};
+  mek.create_board_graph(dim_x,dim_y,weights);
+  path = mek.compute_shortest_walk_ids(0,8);
+  for(int i=0;i<path[0];i++)
+  {
+    //cout << "Shortest Board Path: " << path[i+1] << endl; 
+    if(path[i+1]!=expected_path3[i])
+    {
+      return 1; 
+    }
   }
   return 0;
+}
+
+int test_point_inside_hex_um()
+{
+  double center[2] = {0,0};
+  double unit_length = 1.0;
+  double x[2] = {0,0};
+  UltraMek mek = UltraMek();
+  if(mek.point_in_hex_with_center(x,center,unit_length) != 1)
+   {return 1;}
+  x[0] = 0.1; x[1] = 0.1;
+  if(mek.point_in_hex_with_center(x,center,unit_length) != 1)
+   {return 1;}
+  x[0] = 100.0; x[1] = 0.1;
+  if(mek.point_in_hex_with_center(x,center,unit_length) != 0)
+   {return 1;}
+   
+   return 0;
 }
 
 int ultra_mek_tests()
@@ -240,6 +311,11 @@ int ultra_mek_tests()
   if(test_compute_shortest_walk_ids()!=0)
   {
     cout << "Test path finding (ids) failed!" << endl;
+    return 1;
+  }
+   if(test_point_inside_hex_um()!=0)
+  {
+    cout << "Test if point inside hex failed!" << endl;
     return 1;
   }
   

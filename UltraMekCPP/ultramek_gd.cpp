@@ -70,13 +70,13 @@ Array UltraMekGD::create_grid_centers(int dim_x, int dim_y)
   return centers; 
 }
 
-Array UltraMekGD::create_hex_vertices(double pos_x,double pos_y,double length,double height)
+Array UltraMekGD::create_hex_vertices(double pos_x,double pos_y,double length)
 {
   Array verts;
-  double **vert_matrix = mek.create_hex_vertices(pos_x,pos_y,length,height);
-  for(int i=0;i<2*HEX+2;i++)
+  double **vert_matrix = mek.create_hex_vertices(pos_x,pos_y,length);
+  for(int i=0;i<HEX+1;i++)
   {
-    Vector3 c(vert_matrix[i][0],vert_matrix[i][1],vert_matrix[i][2]);
+    Vector2 c(vert_matrix[i][0],vert_matrix[i][1]);
     verts.push_back(c);
   }
   return verts; 

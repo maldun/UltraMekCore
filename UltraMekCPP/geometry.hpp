@@ -72,8 +72,11 @@ Type ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned int 
    return matrix;
 }
 
-double **compute_hex_vertices(double,double,double,double);
+double **compute_hex_vertices(double,double,double);
 double ***compute_grid_centers(unsigned int, unsigned int,double);
+int point_inside_triangle(double*,double*,double*,double*);
+int point_inside_hex(double*,double**);
+int point_inside_hex_with_center(double*,double*,double);
 
 inline int *compute_vertex_order()
 {

@@ -42,10 +42,11 @@ class UltraMek
      double get_unit_height();
      double get_hex_diameter();
      double ***create_grid_centers(int,int);
-     double **create_hex_vertices(double,double,double,double);
+     double **create_hex_vertices(double,double,double);
      int *create_vertex_order();
      double compute_euclidean(double,double);
      int *compute_shortest_walk_ids(int,int);
+     int point_in_hex_with_center(double*,double*,double);
      
 };
 
