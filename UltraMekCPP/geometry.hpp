@@ -78,6 +78,8 @@ int point_inside_triangle(double*,double*,double*,double*);
 int point_inside_hex(double*,double**);
 int point_inside_hex_with_center(double*,double*,double);
 
+int *point_on_grid(double*,int,int,double***,double);
+
 inline int *compute_vertex_order()
 {
   int *order = new int[3*24];

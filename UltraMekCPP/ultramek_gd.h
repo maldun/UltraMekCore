@@ -59,6 +59,28 @@ public:
     Array create_board_graph(int,int,TypedArray<double>);
     Array compute_shortest_walk_ids(int,int);
     int point_in_hex_with_center(Vector2,Vector2);
+    Array setup_board_geometry(int,int,double,double);
+    Array get_grid_centers();
+    Vector2i compute_board_hex_for_point(Vector2);
+    Vector2 compute_board_hex_center_for_point(Vector2);
+    
 };
+
+template <typename Type = double>
+Array vec2_matrix2array(Type ***matrix,int rows,int cols)
+{
+  Array vecmat;
+  for(int i=0;i<rows;i++)
+  {
+    Array content;
+    for(int j=0;j<cols;j++)
+    {
+      Vector2 c(matrix[i][j][0],matrix[i][j][1]);
+      content.push_back(c);
+    }
+    vecmat.push_back(content);
+  }
+  return vecmat;
+}
 
 #endif //ULTRAMEK_GD_H

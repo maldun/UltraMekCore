@@ -57,17 +57,9 @@ Array UltraMekGD::create_grid_centers(int dim_x, int dim_y)
 {
   Array centers;
   double ***center_matrix = mek.create_grid_centers(dim_x, dim_y);
-  for(int i=0;i<dim_x;i++)
-  {
-    Array content;
-    for(int j=0;j<dim_y;j++)
-    {
-      Vector2 c(center_matrix[i][j][0],center_matrix[i][j][1]);
-      content.push_back(c);
-    }
-    centers.push_back(content);
-  }
+  centers = vec2_matrix2array<double>(center_matrix,dim_x,dim_y);
   return centers; 
+  
 }
 
 int UltraMekGD::point_in_hex_with_center(Vector2 x,Vector2 center)
@@ -159,19 +151,67 @@ Array UltraMekGD::compute_shortest_walk_ids(int start_id,int target_id)
   
 }
 
+Array UltraMekGD::setup_board_geometry(int dim_x,int dim_y,double unit_length,double unit_height)
+{
+  mek.setup_board_geometry(dim_x,dim_y,unit_length,unit_height);
+  double ***centers = mek.get_grid_centers();
+  Array grid_centers = vec2_matrix2array<double>(centers,dim_x,dim_y);
+  return grid_centers; 
+}
+
+Array UltraMekGD::get_grid_centers()
+{
+  return vec2_matrix2array<double>(mek.get_grid_centers(),mek.get_dim_x(),mek.get_dim_y());
+}
+
+Vector2i UltraMekGD::compute_board_hex_for_point(Vector2 p)
+{
+  double pc[2] = {p[0],p[1]};
+  int* result = mek.compute_board_hex_for_point(pc);  
+  Vector2i out(result[0],result[1]);
+
+  return out;
+}
+
+Vector2 UltraMekGD::compute_board_hex_center_for_point(Vector2 p)
+{
+  double pc[2] = {p[0],p[1]};
+  int* result = mek.compute_board_hex_for_point(pc);
+  Vector2 out(0,0);
+  if(result[0] == -1 or result[1] == -1)
+  {
+      out[0] = -INFINITY;
+      out[1] = INFINITY;
+  }
+  else
+  {
+      double ***centers = mek.get_grid_centers();
+      for(int i=0;i<2;i++)
+      {
+        out[i] = centers[result[0]][result[1]][i];
+      }
+  }
+  return out;
+}
+
 void UltraMekGD::_bind_methods()
 {
     ClassDB::bind_method(D_METHOD("get_hex_diameter"), &UltraMekGD::get_hex_diameter);
+    ClassDB::bind_method(D_METHOD("get_grid_centers"), &UltraMekGD::get_grid_centers);
     ClassDB::bind_method(D_METHOD("set_unit_length", "value"), &UltraMekGD::set_unit_length,
 			 DEFVAL(1));
     ClassDB::bind_method(D_METHOD("set_unit_height", "value"), &UltraMekGD::set_unit_height,
 			 DEFVAL(1));
     ClassDB::bind_method(D_METHOD("doubling", "value"), &UltraMekGD::doubling, DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("compute_board_hex_for_point", "point"), &UltraMekGD::compute_board_hex_for_point, DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("compute_board_hex_center_for_point", "point"), &UltraMekGD::compute_board_hex_for_point, DEFVAL(1));
     ClassDB::bind_method(D_METHOD("compute_euclidean", "x", "y"), &UltraMekGD::compute_euclidean, DEFVAL(1),DEFVAL(1));
     ClassDB::bind_method(D_METHOD("get_unit_length"), &UltraMekGD::get_unit_length);
     ClassDB::bind_method(D_METHOD("get_unit_height"), &UltraMekGD::get_unit_height);
     ClassDB::bind_method(D_METHOD("create_grid_centers", "dim_x", "dim_y"),
 			 &UltraMekGD::create_grid_centers, DEFVAL(1),DEFVAL(1));
+    ClassDB::bind_method(D_METHOD("setup_board_geometry", "dim_x", "dim_y","unit_length","unit_height"),
+			 &UltraMekGD::setup_board_geometry, DEFVAL(1),DEFVAL(1),DEFVAL(1),DEFVAL(1));
     ClassDB::bind_method(D_METHOD("create_hex_vertices", "pos_x", "pos_y","length","height"),
 			 &UltraMekGD::create_hex_vertices,
 			 DEFVAL(0),DEFVAL(0),DEFVAL(1),DEFVAL(1));

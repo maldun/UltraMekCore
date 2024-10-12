@@ -30,12 +30,21 @@ UltraMek::UltraMek()
 {
   unit_length = 1.0;
   unit_height = 1.0;
+  hex_dim_x = 0;
+  hex_dim_y = 0;
+  grid_centers = nullptr;
+  hex_ids = nullptr;
   board = Graph();
 }
 
 UltraMek::~UltraMek()
 {
     // do nothing (yet)
+   if(grid_centers != nullptr)
+   {
+      delete grid_centers;
+      grid_centers = nullptr;
+   }
 }
 
 
@@ -107,6 +116,37 @@ int UltraMek::point_in_hex_with_center(double *x,double *center,double unit_leng
   return point_inside_hex_with_center(x,center,unit_length);
 }
 
+void UltraMek::setup_grid_centers()
+{
+  if(hex_dim_x > 0 and hex_dim_y > 0)
+  {grid_centers = create_grid_centers(hex_dim_x,hex_dim_y);}
+  
+}
+
+void UltraMek::setup_board_geometry(unsigned int dim_x, unsigned int dim_y,double unit_length=1.0,double unit_height=0.5)
+{
+  hex_dim_x = dim_x;
+  hex_dim_y = dim_y;
+  set_unit_length(unit_length);
+  set_unit_height(unit_height);
+  setup_grid_centers();
+}
+
+int *UltraMek::compute_board_hex_for_point(double* p)
+{
+  int *result = new int[2];
+  result[0] = -1;result[1] = -1;
+  
+  if(grid_centers==nullptr or unit_length <= 0)
+  {return result;}
+  
+  result = point_on_grid(p,hex_dim_x,hex_dim_y,grid_centers,unit_length);
+  
+  return result;
+}
+
+
+
 //////////////////////////////////////// TESTS /////////////////////////////////////////////////////
 
 
@@ -175,6 +215,55 @@ int test_graph_creation()
     }
   }
   mek.create_board_graph(dim_x,dim_y,weights);
+  return 0;
+}
+
+
+
+int test_point_inside_hex_um()
+{
+  double center[2] = {0,0};
+  double unit_length = 1.0;
+  double x[2] = {0,0};
+  UltraMek mek = UltraMek();
+  if(mek.point_in_hex_with_center(x,center,unit_length) != 1)
+   {return 1;}
+  x[0] = 0.1; x[1] = 0.1;
+  if(mek.point_in_hex_with_center(x,center,unit_length) != 1)
+   {return 1;}
+  x[0] = 100.0; x[1] = 0.1;
+  if(mek.point_in_hex_with_center(x,center,unit_length) != 0)
+   {return 1;}
+   
+   return 0;
+}
+
+int test_geometry_setup()
+{
+  
+  double unit_length = 1.0;
+  double unit_height = 0.5;
+  unsigned int dim_x = 16;
+  unsigned int dim_y = 17;
+  
+  UltraMek mek = UltraMek();
+  mek.setup_board_geometry(dim_x,dim_y,unit_length);
+  if(mek.get_unit_length() != unit_length){return 1;}
+  if(mek.get_unit_height() != unit_height){return 1;}
+  if(mek.get_dim_x() != dim_x){return 1;}
+  if(mek.get_dim_y() != dim_y){return 1;}
+  double ***centers = mek.get_grid_centers();
+  double ***centersX = mek.create_grid_centers(dim_x,dim_y);
+  for(unsigned int i=0;i<dim_x;i++)
+  {
+     for(unsigned int j=0;j<dim_y;j++)
+     {
+       if(centers[i][j][0] != centersX[i][j][0] and centers[i][j][1] != centersX[i][j][1])
+       {
+         return 1;
+       }
+     }
+  }
   return 0;
 }
 
@@ -253,22 +342,22 @@ int test_compute_shortest_walk_ids()
   return 0;
 }
 
-int test_point_inside_hex_um()
+int test_compute_board_hex_for_point()
 {
-  double center[2] = {0,0};
   double unit_length = 1.0;
-  double x[2] = {0,0};
+  unsigned int dim_x = 16;
+  unsigned int dim_y = 17;
+  
+  
   UltraMek mek = UltraMek();
-  if(mek.point_in_hex_with_center(x,center,unit_length) != 1)
-   {return 1;}
-  x[0] = 0.1; x[1] = 0.1;
-  if(mek.point_in_hex_with_center(x,center,unit_length) != 1)
-   {return 1;}
-  x[0] = 100.0; x[1] = 0.1;
-  if(mek.point_in_hex_with_center(x,center,unit_length) != 0)
-   {return 1;}
-   
-   return 0;
+  mek.setup_board_geometry(dim_x,dim_y,unit_length);
+  double ***centers = mek.get_grid_centers();
+  double p[2] = {5,-20};
+  int *result = mek.compute_board_hex_for_point(p);
+  if(mek.point_in_hex_with_center(p,centers[result[0]][result[1]],unit_length)!=1)
+  {return 1;}
+  
+  return 0;
 }
 
 int ultra_mek_tests()
@@ -316,6 +405,11 @@ int ultra_mek_tests()
    if(test_point_inside_hex_um()!=0)
   {
     cout << "Test if point inside hex failed!" << endl;
+    return 1;
+  }
+  if(test_geometry_setup()!=0)
+  {
+    cout << "Test geometry creation!" << endl;
     return 1;
   }
   
