@@ -27,11 +27,15 @@ using namespace std;
 Node::Node()
 {
   ID = -1;
+  pos_x = -1;
+  pos_y = -1;
 }
 
 Node::Node(const int id)
 {
   ID = id;
+  pos_x = -1;
+  pos_y = -1;
 }
 
 Node::Node (const int id,const int x,const int y)
@@ -45,13 +49,15 @@ Node::Node(const string ids)
 {
   stringstream id (ids);
   id >> ID;
+  pos_x = -1;
+  pos_y = -1;
 }
 
 Node::Node(const Node &n)
 {
-  ID = n.ID;
-  pos_x = n.pos_x;
-  pos_y = n.pos_y;
+  ID = n.getID();
+  pos_x = n.getPosX();
+  pos_y = n.getPosY();
 }
 
 int Node::getID() const

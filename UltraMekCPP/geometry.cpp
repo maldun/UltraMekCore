@@ -24,23 +24,25 @@ int *point_on_grid(double* p,int dim_x,int dim_y,double ***grid_centers,double u
 {
   double px = p[0];
   double py = p[1];
+  bool check_x = true;
+  bool check_y = true;
   
   int *out = new int[2];
   out[0]=-1;out[1]=-1;
   
   if(px < grid_centers[0][0][0]-unit_length or px > grid_centers[dim_x-1][0][0]+unit_length)
   {
-    return out;
+    check_x = false;
   }
   if(py > grid_centers[0][0][1]+unit_length or py < grid_centers[0][dim_y-1][1]-unit_length)
   {
-    return out;
+    check_y = false;
   }
   int lowerx = 0;
   int upperx = dim_x;
   int dist = upperx-lowerx;
   int dist2 = dist;
-  while(dist>4)
+  while(dist>4 and check_x==true)
   {
     if(grid_centers[lowerx][0][0]-unit_length <= px and px <= grid_centers[upperx/2][0][0])  
     {
@@ -65,7 +67,7 @@ int *point_on_grid(double* p,int dim_x,int dim_y,double ***grid_centers,double u
   int lowery = 0;
   int uppery = dim_y;
   dist = uppery-lowery;
-  while(dist>4)
+  while(dist>4 and check_y == true)
   {
     // cout << "lower: " << lowery << " upper: " << uppery << endl;
     // cout << "lower: " << grid_centers[0][lowery][1]+unit_length << " upper: " << grid_centers[0][uppery-1][1] << endl;
@@ -90,19 +92,34 @@ int *point_on_grid(double* p,int dim_x,int dim_y,double ***grid_centers,double u
     }
     //cout << "lowerx: " << lowerx << " upperx: " << upperx << endl;
     //cout << "lowery: " << lowery << " uppery: " << uppery << endl;
-    for(int i=lowerx;i<upperx;i++)
+    if(check_x == true and check_y == true)
     {
-      for(int j=lowery;j<uppery;j++)
+      for(int i=lowerx;i<upperx;i++)
       {
-         //cout << "(" << i << "," << j << ") " << point_inside_hex_with_center(p,grid_centers[i][j],unit_length) << endl; 
-         if(point_inside_hex_with_center(p,grid_centers[i][j],unit_length)==1)
-         {
-            
+        for(int j=lowery;j<uppery;j++)
+        {
+           //cout << "(" << i << "," << j << ") " << point_inside_hex_with_center(p,grid_centers[i][j],unit_length) << endl; 
+           if(point_inside_hex_with_center(p,grid_centers[i][j],unit_length)==1)
+           {
             out[0]=i;out[1]=j;
             return out;
          }
       }
-   }
+    }
+  }
+  else
+  {
+     if(check_x == true)
+     {
+        out[0] = (lowerx+upperx)/2;
+     }
+     
+     if(check_y == true)
+     {
+        out[1] = (lowery+uppery)/2;
+     }
+       
+  }
   return out;
 }
 
@@ -210,7 +227,8 @@ int point_inside_hex_with_center(double *x,double *center,double unit_length)
 {
   double **verts = compute_hex_vertices(center[0],center[1],unit_length);
   int state = point_inside_hex(x, verts);
-  delete verts;
+  
+  delete_2d_matrix(HEX,verts);
   return state; 
 }
 
@@ -258,7 +276,7 @@ int test_3d_matrix_creation()
       }
     }
   }
-  delete matrix;
+  delete_3d_matrix(x,y, matrix);
 
   return 0;
 }
@@ -274,7 +292,7 @@ int test_2d_matrix_creation()
       if(matrix[i][j] != 0) {return 1;}
     }
   }
-  delete matrix;
+  delete_2d_matrix(x,matrix);
 
   return 0;
 }
@@ -284,17 +302,17 @@ int test_compute_grid_centers()
   int x = 2; int y = 2;
   double l = 1.0;
   double ***matrix = compute_grid_centers(x,y,l);
-  if(matrix[0][0][0] != l){return l;}
-  if(matrix[0][0][1] != -sqrt(3)*l/2.0){return 1;}
-  if(matrix[1][0][0] != 2.5*l){return 1;}
-  if(matrix[1][0][1] != -sqrt(3)*l){return 1;}
+  if(matrix[0][0][0] != l){delete_3d_matrix(x,y,matrix);return l;}
+  if(matrix[0][0][1] != -sqrt(3)*l/2.0){delete_3d_matrix(x,y,matrix);return 1;}
+  if(matrix[1][0][0] != 2.5*l){delete_3d_matrix(x,y,matrix);return 1;}
+  if(matrix[1][0][1] != -sqrt(3)*l){delete_3d_matrix(x,y,matrix);return 1;}
 
-  if(matrix[0][1][0] != l){return 1;}
-  if(matrix[0][1][1] != -3*sqrt(3)*l/2.0){return 1;}
-  if(matrix[1][1][0] != 2.5*l){return 1;}
-  if(matrix[1][1][1] != -2.0*sqrt(3)*l){return 1;}
+  if(matrix[0][1][0] != l){delete_3d_matrix(x,y,matrix);return 1;}
+  if(matrix[0][1][1] != -3*sqrt(3)*l/2.0){delete_3d_matrix(x,y,matrix);return 1;}
+  if(matrix[1][1][0] != 2.5*l){delete_3d_matrix(x,y,matrix);return 1;}
+  if(matrix[1][1][1] != -2.0*sqrt(3)*l){delete_3d_matrix(x,y,matrix);return 1;}
 
-  delete matrix;
+  delete_3d_matrix(x,y,matrix);
 
   
   return 0;
@@ -321,7 +339,7 @@ int test_compute_hex_vertices()
 //   if(abs(matrix[9][1]-l*sqrt(3.0)/2.0) > 1e-6){return 1;}
 //   if(matrix[9][2] != h){return 1;}
 //   
-  delete matrix;
+  delete_2d_matrix(HEX,matrix);
 
   return 0;
   
@@ -358,21 +376,21 @@ int test_point_inside_hex()
   double **verts = compute_hex_vertices(center[0],center[1],unit_length);
   double x[2] = {0,0};
   if(point_inside_hex(x,verts) != 1)
-   {return 1;}
+   {delete_2d_matrix(HEX,verts); return 1;}
   if(point_inside_hex_with_center(x,center,unit_length) != 1)
-   {return 1;}
+   {delete_2d_matrix(HEX,verts);return 1;}
   x[0] = 0.1; x[1] = 0.1;
   if(point_inside_hex(x,verts) != 1)
-   {return 1;}
+   {delete_2d_matrix(HEX,verts); return 1;}
   if(point_inside_hex_with_center(x,center,unit_length) != 1)
-   {return 1;}
+   {delete_2d_matrix(HEX,verts); return 1;}
   x[0] = 100.0; x[1] = 0.1;
   if(point_inside_hex(x,verts) != 0)
-   {return 1;}
+   {delete_2d_matrix(HEX,verts); return 1;}
   if(point_inside_hex_with_center(x,center,unit_length) != 0)
-   {return 1;}
+   {delete_2d_matrix(HEX,verts); return 1;}
    
-   delete verts;
+   delete_2d_matrix(HEX,verts);
    return 0;
 }
 

@@ -38,7 +38,7 @@ double compute_hex_height(double);
 double compute_hex_sub_height(double);
 
 template <typename Type = double>
-Type **initialize_2d_matrix(unsigned int dim_x,unsigned int dim_y)
+inline Type **initialize_2d_matrix(unsigned int dim_x,unsigned int dim_y)
 {
    Type **matrix = new Type*[dim_x];
    for(unsigned int i=0;i<dim_x;i++)
@@ -54,7 +54,7 @@ Type **initialize_2d_matrix(unsigned int dim_x,unsigned int dim_y)
 }
 
 template <typename Type = double>
-Type ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned int dim_z)
+inline Type ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned int dim_z)
 {
    Type ***matrix = new Type**[dim_x];
    for(unsigned int i=0;i<dim_x;i++)
@@ -70,6 +70,28 @@ Type ***initialize_3d_matrix(unsigned int dim_x,unsigned int dim_y,unsigned int 
       }  
    }
    return matrix;
+}
+
+template <typename Type = double>
+inline void delete_2d_matrix(unsigned int dim_x,Type **matrix_2d)
+{
+  for(unsigned int k=0;k<dim_x;k++)
+  { delete[] matrix_2d[k]; }
+  delete[] matrix_2d;
+  matrix_2d = nullptr;
+}
+
+template <typename Type = double>
+inline void delete_3d_matrix(unsigned int dim_x,unsigned int dim_y,Type ***matrix_3d)
+{
+  for(unsigned int k=0;k<dim_x;k++)
+  {
+    for(unsigned int l=0;l<dim_y;l++)
+    {delete[] matrix_3d[k][l]; }
+    delete[] matrix_3d[k];
+  }
+  delete[] matrix_3d;
+  matrix_3d = nullptr;
 }
 
 double **compute_hex_vertices(double,double,double);

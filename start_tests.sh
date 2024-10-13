@@ -1,4 +1,5 @@
 #!/bin/bash
+scons -c
 scons
 
 cp "UltraMekCPP/_ultramek.so" "UltraMekPy/_ultramek.so"

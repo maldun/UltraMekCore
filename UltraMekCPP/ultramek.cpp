@@ -42,9 +42,10 @@ UltraMek::~UltraMek()
     // do nothing (yet)
    if(grid_centers != nullptr)
    {
-      delete grid_centers;
+      delete_3d_matrix(hex_dim_x,hex_dim_y,grid_centers);
       grid_centers = nullptr;
    }
+   board=Graph();
 }
 
 
@@ -108,6 +109,7 @@ int *UltraMek::compute_shortest_walk_ids(int start_id,int target_id)
    {
      result[k+2] = path[k];
    }
+   path=vector<int>();
    return result;
 }
 
@@ -294,6 +296,8 @@ int test_compute_shortest_walk_ids()
     //cout << "Shortest Board Path: " << path[i+1] << endl; 
     if(path[i+1]!=expected_path[i])
     {
+      delete[] path;
+      delete_2d_matrix(dim_x,weights);
       return 1; 
     }
   }
@@ -315,6 +319,8 @@ int test_compute_shortest_walk_ids()
     //cout << "Shortest Board Path: " << path[i+1] << endl; 
     if(path[i+1]!=expected_path2[i])
     {
+      delete[] path;
+      delete_2d_matrix(dim_x,weights);
       return 1; 
     }
   }
@@ -336,9 +342,13 @@ int test_compute_shortest_walk_ids()
     //cout << "Shortest Board Path: " << path[i+1] << endl; 
     if(path[i+1]!=expected_path3[i])
     {
+      delete[] path;
+      delete_2d_matrix(dim_x,weights);
       return 1; 
     }
   }
+  delete[] path;
+  delete_2d_matrix(dim_x,weights);
   return 0;
 }
 
@@ -355,8 +365,15 @@ int test_compute_board_hex_for_point()
   double p[2] = {5,-20};
   int *result = mek.compute_board_hex_for_point(p);
   if(mek.point_in_hex_with_center(p,centers[result[0]][result[1]],unit_length)!=1)
-  {return 1;}
+  {
+    delete centers;
+    delete result;
+    return 1;
+    
+  }
   
+  delete centers;
+  delete result;
   return 0;
 }
 

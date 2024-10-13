@@ -58,6 +58,8 @@ Array UltraMekGD::create_grid_centers(int dim_x, int dim_y)
   Array centers;
   double ***center_matrix = mek.create_grid_centers(dim_x, dim_y);
   centers = vec2_matrix2array<double>(center_matrix,dim_x,dim_y);
+  if(center_matrix != nullptr){delete_3d_matrix(dim_x,dim_y,center_matrix);}
+  
   return centers; 
   
 }
@@ -80,6 +82,7 @@ Array UltraMekGD::create_hex_vertices(double pos_x,double pos_y,double length)
     Vector2 c(vert_matrix[i][0],vert_matrix[i][1]);
     verts.push_back(c);
   }
+  if(vert_matrix != nullptr) { delete_2d_matrix(HEX,vert_matrix);}
   return verts; 
 }
 
@@ -91,6 +94,7 @@ Array UltraMekGD::create_vertex_order()
   {
     order.push_back(order_vec[i]);
   }
+  delete[] order_vec;
   return order; 
 }
 
@@ -114,6 +118,8 @@ double UltraMekGD::compute_euclidean(double x,double y)
 
 Array UltraMekGD::create_board_graph(int dim_x,int dim_y,TypedArray<double> weights)
 {
+  Array result = {};
+  if(dim_x <= 0 or dim_y <= 0) {return result;}
   double **wmatrix = new double*[dim_x];
   for(int i=0;i<dim_x;i++)
   {
@@ -124,7 +130,6 @@ Array UltraMekGD::create_board_graph(int dim_x,int dim_y,TypedArray<double> weig
     }
   }
   int **ids = mek.create_board_graph(dim_x,dim_y,wmatrix); 
-  Array result;
   for(int i=0;i<dim_x;i++)
   {
     Array row = {};
@@ -134,6 +139,8 @@ Array UltraMekGD::create_board_graph(int dim_x,int dim_y,TypedArray<double> weig
     }
     result.push_back(row);
   }
+  delete_2d_matrix(dim_x,wmatrix);
+  delete_2d_matrix(dim_x,ids);
   return result;
 }
 
@@ -142,11 +149,12 @@ Array UltraMekGD::compute_shortest_walk_ids(int start_id,int target_id)
   Array path;
   path.push_back(start_id);
   int *path_arr = mek.compute_shortest_walk_ids(start_id,target_id);
-  int len = sizeof(path_arr)/sizeof(int);
+  int len = path_arr[0];
   for(int i=0;i<len;i++)
   {
-    path.push_back(path_arr[i]); 
+    path.push_back(path_arr[i+1]); 
   }
+  delete[] path_arr;
   return path;
   
 }
@@ -169,7 +177,7 @@ Vector2i UltraMekGD::compute_board_hex_for_point(Vector2 p)
   double pc[2] = {p[0],p[1]};
   int* result = mek.compute_board_hex_for_point(pc);  
   Vector2i out(result[0],result[1]);
-
+  if(result!= nullptr) {delete[] result;}
   return out;
 }
 
@@ -191,6 +199,7 @@ Vector2 UltraMekGD::compute_board_hex_center_for_point(Vector2 p)
         out[i] = centers[result[0]][result[1]][i];
       }
   }
+  if(result!= nullptr) {delete result;}
   return out;
 }
 

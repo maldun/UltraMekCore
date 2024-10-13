@@ -55,10 +55,10 @@ Graph::Graph()
 
 Graph::~Graph()
 {
+  nodes.clear();
+  edges.clear();
   nodes = vector<Node>();  
   edges = vector<Edge>();  
-  nr_nodes = 0;
-  nr_edges = 0;
 }
 
 Node Graph::getNodeByPos(const int x,const int y)
@@ -361,7 +361,7 @@ Edge Graph::getEdge(const Node start,const Node end)
 // Help function that returns ID with minimum distance
 int get_shortest_index(vector<Node> queue, map<int,double> distances)
 {
-	vector<double> dists;
+	vector<double> dists=vector<double>();
 	for(unsigned long int i=0;i<queue.size();i++)
 	{
 	   Node q = queue[i];
@@ -370,6 +370,8 @@ int get_shortest_index(vector<Node> queue, map<int,double> distances)
 	}
 	auto it = min_element(dists.begin(), dists.end());
 	int min_index = distance(dists.begin(), it);
+    dists.clear();
+    dists = vector<double>();
 	return min_index;
 
 }
@@ -377,7 +379,8 @@ int get_shortest_index(vector<Node> queue, map<int,double> distances)
 // Shortest path algorithm by Dijkstra
 vector<int> shortest_path_dijkstra(Graph graph, Node start, Node end)
 {
-	vector<Node> graph_nodes (graph.getNodes());
+	vector<Node> graph_nodes(graph.getNodes());
+    
 	map<int,double> distances;
 	map<int,int> previous;
 	vector<Node> queue;
@@ -433,7 +436,9 @@ vector<int> shortest_path_dijkstra(Graph graph, Node start, Node end)
 	   path.insert(path.begin(),u_id);
 	   u_id = previous[u_id];
 	}
-	
+	distances.clear();
+    previous.clear();
+    queue = vector<Node>();
 	return(path);
 }
 
@@ -450,6 +455,7 @@ vector<Node> Graph::shortest_path(Node start, Node end)
    {
      path.push_back(this->getNodeByID(id)); 
    }
+   path_ids=vector<int>();
    return path; 
 }
 
