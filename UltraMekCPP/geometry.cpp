@@ -228,7 +228,7 @@ int point_inside_hex_with_center(double *x,double *center,double unit_length)
   double **verts = compute_hex_vertices(center[0],center[1],unit_length);
   int state = point_inside_hex(x, verts);
   
-  delete_2d_matrix(HEX,verts);
+  delete_2d_matrix(HEX+1,verts);
   return state; 
 }
 
@@ -339,7 +339,7 @@ int test_compute_hex_vertices()
 //   if(abs(matrix[9][1]-l*sqrt(3.0)/2.0) > 1e-6){return 1;}
 //   if(matrix[9][2] != h){return 1;}
 //   
-  delete_2d_matrix(HEX,matrix);
+  delete_2d_matrix(HEX+1,matrix);
 
   return 0;
   
@@ -376,21 +376,21 @@ int test_point_inside_hex()
   double **verts = compute_hex_vertices(center[0],center[1],unit_length);
   double x[2] = {0,0};
   if(point_inside_hex(x,verts) != 1)
-   {delete_2d_matrix(HEX,verts); return 1;}
+   {delete_2d_matrix(HEX+1,verts); return 1;}
   if(point_inside_hex_with_center(x,center,unit_length) != 1)
-   {delete_2d_matrix(HEX,verts);return 1;}
+   {delete_2d_matrix(HEX+1,verts);return 1;}
   x[0] = 0.1; x[1] = 0.1;
   if(point_inside_hex(x,verts) != 1)
-   {delete_2d_matrix(HEX,verts); return 1;}
+   {delete_2d_matrix(HEX+1,verts); return 1;}
   if(point_inside_hex_with_center(x,center,unit_length) != 1)
-   {delete_2d_matrix(HEX,verts); return 1;}
+   {delete_2d_matrix(HEX+1,verts); return 1;}
   x[0] = 100.0; x[1] = 0.1;
   if(point_inside_hex(x,verts) != 0)
-   {delete_2d_matrix(HEX,verts); return 1;}
+   {delete_2d_matrix(HEX+1,verts); return 1;}
   if(point_inside_hex_with_center(x,center,unit_length) != 0)
-   {delete_2d_matrix(HEX,verts); return 1;}
+   {delete_2d_matrix(HEX+1,verts); return 1;}
    
-   delete_2d_matrix(HEX,verts);
+   delete_2d_matrix(HEX+1,verts);
    return 0;
 }
 
@@ -407,19 +407,24 @@ int test_point_on_board()
   if(point_inside_hex_with_center(p,centers[result[0]][result[1]],unit_length)!=1)
   {return 1;}
   
+  
   p[0] = -1;
+  delete[] result;
   result = point_on_grid(p,dim_x,dim_y,centers,unit_length);
   if(result[0] != -1 and result[1] != -1)
   {return 1;}
   p[1] = 1; p[0] = 5;
+  delete[] result;
   result = point_on_grid(p,dim_x,dim_y,centers,unit_length);
   if(result[0] != -1 and result[1] != -1)
   {return 1;}
+  delete_3d_matrix(dim_x, dim_y, centers);
   
   dim_x = 1;
   dim_y = 2;
   centers = compute_grid_centers(dim_x,dim_y,unit_length);
   p[1]= p[0]=0;
+  delete[] result;
   result = point_on_grid(p,dim_x,dim_y,centers,unit_length);
   if(result[0] != 0 and result[1] != 0)
   {
@@ -427,6 +432,8 @@ int test_point_on_board()
     //cout << point_inside_hex_with_center(p,centers[0][0],unit_length) << endl;
     return 1;}
   
+  delete[] result;
+  delete_3d_matrix(dim_x, dim_y, centers);
   return 0;
   
 }

@@ -39,11 +39,15 @@ UltraMek::UltraMek()
 
 UltraMek::~UltraMek()
 {
-    // do nothing (yet)
    if(grid_centers != nullptr)
    {
-      delete_3d_matrix(hex_dim_x,hex_dim_y,grid_centers);
+      delete_3d_matrix(hex_dim_x,hex_dim_y, grid_centers);
       grid_centers = nullptr;
+   }
+   if(hex_ids != nullptr)
+   {
+      delete_2d_matrix<int>(hex_dim_x,hex_ids);
+      hex_ids = nullptr;
    }
    board=Graph();
 }
@@ -216,7 +220,9 @@ int test_graph_creation()
       counter+=1.0;
     }
   }
-  mek.create_board_graph(dim_x,dim_y,weights);
+  int **ids = mek.create_board_graph(dim_x,dim_y,weights);
+  delete_2d_matrix<int>(dim_x,ids);
+  delete_2d_matrix(dim_x,weights);
   return 0;
 }
 
@@ -266,6 +272,7 @@ int test_geometry_setup()
        }
      }
   }
+  delete_3d_matrix(dim_x,dim_y,centersX);
   return 0;
 }
 
@@ -288,7 +295,8 @@ int test_compute_shortest_walk_ids()
       counter+=1.0;
     }
   }
-  mek.create_board_graph(dim_x,dim_y,weights);
+  int **bg = mek.create_board_graph(dim_x,dim_y,weights);
+  delete_2d_matrix<int>(dim_x,bg);
   int *path = mek.compute_shortest_walk_ids(0,8);
   int expected_path[4] = {0,3,4,8};
   for(int i=0;i<path[0];i++)
@@ -312,7 +320,10 @@ int test_compute_shortest_walk_ids()
   }
   weights[1][1]=20;
   int expected_path2[5] = {0,3,6,7,8};
-  mek.create_board_graph(dim_x,dim_y,weights);
+  
+  bg = mek.create_board_graph(dim_x,dim_y,weights);
+  delete_2d_matrix<int>(dim_x,bg);
+  delete[] path;
   path = mek.compute_shortest_walk_ids(0,8);
   for(int i=0;i<path[0];i++)
   {
@@ -335,7 +346,9 @@ int test_compute_shortest_walk_ids()
   }
   weights[1][1]=20;
   int expected_path3[4] = {0,1,5,8};
-  mek.create_board_graph(dim_x,dim_y,weights);
+  bg = mek.create_board_graph(dim_x,dim_y,weights);
+  delete_2d_matrix<int>(dim_x,bg);
+  delete[] path;
   path = mek.compute_shortest_walk_ids(0,8);
   for(int i=0;i<path[0];i++)
   {
@@ -366,14 +379,14 @@ int test_compute_board_hex_for_point()
   int *result = mek.compute_board_hex_for_point(p);
   if(mek.point_in_hex_with_center(p,centers[result[0]][result[1]],unit_length)!=1)
   {
-    delete centers;
-    delete result;
+    delete_3d_matrix(dim_x,dim_y, centers);
+    delete[] result;
     return 1;
     
   }
   
-  delete centers;
-  delete result;
+  delete_3d_matrix(dim_x,dim_y, centers);
+  delete[] result;
   return 0;
 }
 

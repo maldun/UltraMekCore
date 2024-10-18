@@ -29,8 +29,9 @@
 #include "node.hpp"
 #include "edge.hpp"
 #include "graph.hpp"
+#include "geometry.hpp"
 
-#define INFINITY 1.7E+308 // max what is possible
+//#define INFINITY 1.7E+308 // max what is possible
 
 using namespace std;
 
@@ -47,8 +48,8 @@ Graph::Graph(vector<Node> nodess, vector<Edge> edgess)
 
 Graph::Graph()
 {
-  nodes = vector<Node>{};
-  edges = vector<Edge>{};
+  nodes = vector<Node>();
+  edges = vector<Edge>();
   nr_nodes = 0;
   nr_edges = 0;
 }
@@ -281,40 +282,52 @@ bool Graph::isConsistent()
   {
     return false;
   }
-  for(long unsigned int j=0; j < nr_edges; j++)
+  if(nr_edges == 0 and nr_nodes == 0)
   {
-    bool start_is_in_graph = false;
-    bool end_is_in_graph = false;
+       return true; 
+  }
+  
+  if(nr_nodes > 0)
+  {
+    // Check if ids are positive
     for(long unsigned int i=0; i < nr_nodes;i++)
     {
-      if(nodes[i].getID() == edges[j].getStartID())
-      {
-        start_is_in_graph = true;
-        break;
-      }
-    }
-    if(start_is_in_graph == false) {
-      return false;
-    }
-    for(long unsigned int i=0; i < nr_nodes;i++)
-    {
-      if(nodes[i].getID() == edges[j].getEndID())
-      {
-        end_is_in_graph = true;
-        break;
-      }
-    }
-    if(end_is_in_graph == false) {
-      return false;
+	    if(nodes[i].getID() < 0)
+	    {   
+		    return false;
+	    }
     }
   }
-  // Check if ids are positive
-  for(long unsigned int i=0; i < nr_nodes;i++)
+  
+  if(nr_edges > 0)
   {
-	  if(nodes[i].getID() < 0)
-	  {   
-		  return false;
-	  }
+    for(long unsigned int j=0; j < nr_edges; j++)
+    {
+      bool start_is_in_graph = false;
+      bool end_is_in_graph = false;
+      for(long unsigned int i=0; i < nr_nodes;i++)
+      {
+        if(nodes[i].getID() == edges[j].getStartID())
+        {
+          start_is_in_graph = true;
+          break;
+        }
+      }
+      if(start_is_in_graph == false) {
+        return false;
+      }
+      for(long unsigned int i=0; i < nr_nodes;i++)
+      {
+        if(nodes[i].getID() == edges[j].getEndID())
+        {
+          end_is_in_graph = true;
+          break;
+        }
+      }
+      if(end_is_in_graph == false) {
+        return false;
+      }
+    }
   }
   return true;
 }
@@ -552,6 +565,7 @@ int testGraphCreation()
     }
   }
   Graph graph2 = Graph(dim_x,dim_y,weights);
+  delete_2d_matrix(dim_x,weights);
   vector<Node> nodes2 = graph2.getNodes();
   vector<Edge> edges2 = graph2.getEdges();
   if(nodes2[0].getID() != 0 or edges2[0].getStartNode().getID()!=0 or graph2.getNodeByPos(0,1).getID() != edges2[0].getEndID() or graph2.getNodeByPos(0,1).getID() != edges2[0].getEndID())

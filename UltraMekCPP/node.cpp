@@ -53,11 +53,11 @@ Node::Node(const string ids)
   pos_y = -1;
 }
 
-Node::Node(const Node &n)
+Node::Node(const Node &other)
 {
-  ID = n.getID();
-  pos_x = n.getPosX();
-  pos_y = n.getPosY();
+  ID = other.getID();
+  pos_x = other.getPosX();
+  pos_y = other.getPosY();
 }
 
 int Node::getID() const

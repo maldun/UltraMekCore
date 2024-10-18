@@ -66,6 +66,9 @@ Edge::Edge(const string line)
   start = Node(vals[0]);
   end = Node(vals[1]);
   weight = stod(vals[2]);
+  
+  vals.clear();
+  vals = vector<string>();
 
 }
 
