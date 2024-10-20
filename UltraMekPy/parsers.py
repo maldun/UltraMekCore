@@ -235,7 +235,7 @@ class BlkTests(unittest.TestCase):
             text = fp.read()
             
         xml_text = self.blkp.blk2xml(text)
-        breakpoint()
+        #breakpoint()
         root = ET.fromstring(xml_text)
 
     def test_xml2dict(self):
