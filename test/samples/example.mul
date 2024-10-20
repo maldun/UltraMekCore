@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<unit version="0.49.20" >
+
+		<entity chassis="Atlas" model="AS7-D" type="Biped" commander="false" offboard="false" hidden="false" deployment="0" deploymentZone="-1" deploymentZoneWidth="3" deploymentZoneOffset="0" deploymentZoneAnyNWx="-1" deploymentZoneAnyNWy="-1" deploymentZoneAnySEx="-1" deploymentZoneAnySEy="-1" neverDeployed="true" externalId="a3878a47-ccff-4332-8763-3e83559b4ff5">
+			<pilot size="1" name="Jamia Stewart" nick="" gender="FEMALE" clanperson="false" gunnery="4" piloting="4" externalId="98bcffa9-0e36-4d2b-aaa9-e65a1ca0f9e7" ejected="false" autoeject="true"/>
+      The first slot in a location is at index="1".
+			<location index="2"> Right Torso
+				<slot index="11" type="IS Ammo AC/20" shots="5"/>
+				<slot index="12" type="IS Ammo AC/20" shots="5"/>
+			</location>
+			<location index="3"> Left Torso
+				<slot index="9" type="IS Ammo LRM-20" shots="6"/>
+				<slot index="10" type="IS Ammo LRM-20" shots="6"/>
+				<slot index="11" type="IS Ammo SRM-6" shots="15"/>
+			</location>
+			<Game id="1"/>
+		</entity>
+
+</unit>

@@ -35,6 +35,9 @@ def strip_and_part_line(line,char=None):
     line = [l.strip() for l in line if len(line) > 0]
     return line
 
+def replace_whitespace(text,char):
+    return re.sub(r"\s+", char,text , flags=re.UNICODE)
+
 class FunctionTests(unittest.TestCase):
     """
     Test Classfor functions
@@ -51,4 +54,15 @@ class FunctionTests(unittest.TestCase):
         expected = ["Camel","Case"]
         for r, e in zip(result,expected):
             self.assertEqual(r,e)
+            
+        line = "camelCase"
+        result =split_camel_case(line)
+        expected = ["camel","Case"]
+        for r, e in zip(result,expected):
+            self.assertEqual(r,e)
+            
+    def test_replace_whitespace(self):
+        line = "abc def"
+        expected = "abc_def"
+        self.assertEqual(expected,replace_whitespace(line,'_'))
             

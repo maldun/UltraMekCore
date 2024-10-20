@@ -43,6 +43,9 @@ class RequestProcessor:
     def get_request(self, dic):
         return dic[self.request_type] 
     
+    def _process(self,request,game_state):
+        raise NotImplementError("Error: Request processing not implemented yet!")
+    
     def __call__(self, dic, game_state):
         request = dic
 
@@ -59,7 +62,11 @@ class BoardRequest(RequestProcessor):
         game_state.setup_board(b)
         return j
 
-rtypes = [BoardRequest]
+class DeploymentRequest(RequestProcessor):
+    def _process(self, request, game_state):
+        return {"meks":"Atlas"}
+
+rtypes = [BoardRequest,DeploymentRequest]
 
 request_type_map = {}
 for rtype in rtypes:

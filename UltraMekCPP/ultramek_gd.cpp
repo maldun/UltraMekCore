@@ -82,7 +82,7 @@ Array UltraMekGD::create_hex_vertices(double pos_x,double pos_y,double length)
     Vector2 c(vert_matrix[i][0],vert_matrix[i][1]);
     verts.push_back(c);
   }
-  if(vert_matrix != nullptr) { delete_2d_matrix(HEX,vert_matrix);}
+  if(vert_matrix != nullptr) { delete_2d_matrix(HEX+1,vert_matrix);}
   return verts; 
 }
 
