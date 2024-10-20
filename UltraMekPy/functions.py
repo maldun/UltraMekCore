@@ -38,6 +38,16 @@ def strip_and_part_line(line,char=None):
 def replace_whitespace(text,char):
     return re.sub(r"\s+", char,text , flags=re.UNICODE)
 
+def string2float(val):
+    try:
+        val = float(val)
+        if int(val)==val:
+            val = int(val)
+    except ValueError:
+        pass
+        
+    return val
+
 class FunctionTests(unittest.TestCase):
     """
     Test Classfor functions

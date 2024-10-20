@@ -221,9 +221,9 @@ void UltraMekGD::_bind_methods()
 			 &UltraMekGD::create_grid_centers, DEFVAL(1),DEFVAL(1));
     ClassDB::bind_method(D_METHOD("setup_board_geometry", "dim_x", "dim_y","unit_length","unit_height"),
 			 &UltraMekGD::setup_board_geometry, DEFVAL(1),DEFVAL(1),DEFVAL(1),DEFVAL(1));
-    ClassDB::bind_method(D_METHOD("create_hex_vertices", "pos_x", "pos_y","length","height"),
+    ClassDB::bind_method(D_METHOD("create_hex_vertices", "pos_x", "pos_y","length"),
 			 &UltraMekGD::create_hex_vertices,
-			 DEFVAL(0),DEFVAL(0),DEFVAL(1),DEFVAL(1));
+			 DEFVAL(0),DEFVAL(0),DEFVAL(1));
     ClassDB::bind_method(D_METHOD("create_vertex_order"), &UltraMekGD::create_vertex_order);
     ClassDB::bind_method(D_METHOD("create_board_graph", "dim_x", "dim_y", "weights"),
 			 &UltraMekGD::create_board_graph, DEFVAL(1),DEFVAL(1),DEFVAL(1));

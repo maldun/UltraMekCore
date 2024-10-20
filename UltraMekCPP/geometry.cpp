@@ -27,101 +27,204 @@ int *point_on_grid(double* p,int dim_x,int dim_y,double ***grid_centers,double u
   bool check_x = true;
   bool check_y = true;
   
+  int shift = 3;
+  int lowerx = 0;
+  int upperx = dim_x;
+  int lowery = 0;
+  int uppery = dim_y;
+  
+  int nr_hex_x = 0;
+  int nr_hex_y = 0;
+  
   int *out = new int[2];
   out[0]=-1;out[1]=-1;
   
-  if(px < grid_centers[0][0][0]-unit_length or px > grid_centers[dim_x-1][0][0]+unit_length)
+  
+  // O----> x+
+  // |
+  // |
+  // v
+  // y-
+  double unit_height = sin(PI/3)*unit_length;
+  double center_origin[2] = {grid_centers[0][0][0],grid_centers[0][0][1]};
+  double center_outbound[2] = {grid_centers[dim_x-1][dim_y-1][0],grid_centers[dim_x-1][dim_y-1][1]};
+  double min_x = center_origin[0]-unit_length;
+  double max_x = center_outbound[0]+unit_length;
+  double max_y = center_origin[1]+unit_height;
+  double min_y = center_outbound[1]-2*unit_height;
+  
+  if(px < min_x or px > max_x)
   {
     check_x = false;
-  }
-  if(py > grid_centers[0][0][1]+unit_length or py < grid_centers[0][dim_y-1][1]-unit_length)
-  {
-    check_y = false;
-  }
-  int lowerx = 0;
-  int upperx = dim_x;
-  int dist = upperx-lowerx;
-  int dist2 = dist;
-  while(dist>4 and check_x==true)
-  {
-    if(grid_centers[lowerx][0][0]-unit_length <= px and px <= grid_centers[upperx/2][0][0])  
+    if(abs(min_x-px) > abs(max_x-px))
     {
-       //lowerx = lowerx;
-       upperx = upperx/2;
-    }
-    else if(grid_centers[upperx/2][0][0] < px and px <= grid_centers[min(upperx,dim_x-1)][0][0]+unit_length)  
-    {
-       lowerx = upperx/2;
-       //upperx = upperx;
+       px = center_outbound[0];
+       lowerx = max(0,dim_x-shift);
+       //upperx = dim_x;
     }
     else
-    {break;}
-    // stop deadlock ...
-    dist2 = upperx-lowerx;
-    if(dist2 == dist)
-    {break;}
-    else 
-    {dist=dist2;}
-    
-  }
-  int lowery = 0;
-  int uppery = dim_y;
-  dist = uppery-lowery;
-  while(dist>4 and check_y == true)
-  {
-    // cout << "lower: " << lowery << " upper: " << uppery << endl;
-    // cout << "lower: " << grid_centers[0][lowery][1]+unit_length << " upper: " << grid_centers[0][uppery-1][1] << endl;
-   if(grid_centers[0][lowery][1]+2*unit_length >= py and py >= grid_centers[0][uppery/2][1])  
     {
-       //lowery = lowery;
-       uppery = uppery/2;
-    }
-    else if(grid_centers[0][uppery/2][1] > py and py>=grid_centers[0][min(uppery,dim_y-1)][1]-unit_length)
-    {
-       lowery = uppery/2;
-       //uppery = uppery;
-    }
-    else
-    {break;}
-    // stop deadlock ...
-    dist2 = uppery-lowery;
-    if(dist2 == dist)
-    {break;}
-    else 
-    {dist=dist2;}
-    }
-    //cout << "lowerx: " << lowerx << " upperx: " << upperx << endl;
-    //cout << "lowery: " << lowery << " uppery: " << uppery << endl;
-    if(check_x == true and check_y == true)
-    {
-      for(int i=lowerx;i<upperx;i++)
-      {
-        for(int j=lowery;j<uppery;j++)
-        {
-           //cout << "(" << i << "," << j << ") " << point_inside_hex_with_center(p,grid_centers[i][j],unit_length) << endl; 
-           if(point_inside_hex_with_center(p,grid_centers[i][j],unit_length)==1)
-           {
-            out[0]=i;out[1]=j;
-            return out;
-         }
-      }
+       px = center_origin[0];
+       //lowerx = 0;
+       upperx = min(shift,dim_x);
     }
   }
   else
   {
-     if(check_x == true)
-     {
-        out[0] = (lowerx+upperx)/2;
-     }
+     double dist_px = px-min_x;
+     nr_hex_x = static_cast<int>(floor(dist_px/(1.5*unit_length)));
      
-     if(check_y == true)
-     {
-        out[1] = (lowery+uppery)/2;
-     }
-       
+     lowerx=max(nr_hex_x-shift,0); 
+     upperx=min(nr_hex_x+shift,dim_x);
+     
   }
+  
+  if(py < min_y or py > max_y)
+  {
+    check_y = false;
+    if(abs(min_y-py) > abs(py-max_y))
+    {
+       py = center_origin[1];
+       //lowery = 0;
+       uppery = min(2,dim_y);;
+    }
+    else
+    {
+       py = center_outbound[1]; 
+       lowery = max(0,dim_y-shift);
+       //uppery = dim_y;
+    }
+  }
+  else
+  {
+     double dist_py = max_y-py;
+     nr_hex_y = static_cast<int>(floor(dist_py/(2*unit_height)));
+     lowery=max(nr_hex_y-shift,0); 
+     uppery=min(nr_hex_y+shift,dim_y);
+  }
+  // cout << "Nr estimated: " << nr_hex_x << " " << nr_hex_y << endl;
+  // cout << "X bounds: " << lowerx << " " << upperx << endl;
+  // cout << "Y bounds: " << lowery << " " << uppery << endl;
+  
+  // if(check_x == true and check_y == true)
+  // {
+  
+    // lowerx = 0;
+    // upperx = dim_x;
+    // lowery = 0;
+    // uppery = dim_y;
+    double q[2] = {px,py};
+    for(int i=lowerx;i<upperx;i++)
+      {
+        for(int j=lowery;j<uppery;j++)
+        {
+           //cout << "(" << i << "," << j << ") " << point_inside_hex_with_center(p,grid_centers[i][j],unit_length) << endl; 
+           if(point_inside_hex_with_center(q,grid_centers[i][j],unit_length)==1)
+           {
+            if(check_x==true){out[0]=i;}
+            if(check_y==true){out[1]=j;}
+            return out;
+         }
+      }
+    }
+  //}
+  
   return out;
 }
+//   if(px < grid_centers[0][0][0]-unit_length or px > grid_centers[dim_x-1][0][0]+unit_length)
+//   {
+//     check_x = false;
+//   }
+//   if(py > grid_centers[0][0][1]+unit_length or py < grid_centers[0][dim_y-1][1]-unit_length)
+//   {
+//     check_y = false;
+//   }
+//   int lowerx = 0;
+//   int upperx = dim_x;
+//   int dist = upperx-lowerx;
+//   int dist2 = dist;
+//   
+  
+  
+//   while(dist>4 and check_x==true)
+//   {
+//     if(grid_centers[lowerx][0][0]-unit_length <= px and px <= grid_centers[upperx/2][0][0])  
+//     {
+//        //lowerx = lowerx;
+//        upperx = upperx/2;
+//     }
+//     else if(grid_centers[upperx/2][0][0] < px and px <= grid_centers[min(upperx,dim_x-1)][0][0]+unit_length)  
+//     {
+//        lowerx = upperx/2;
+//        //upperx = upperx;
+//     }
+//     else
+//     {break;}
+//     // stop deadlock ...
+//     dist2 = upperx-lowerx;
+//     if(dist2 == dist)
+//     {break;}
+//     else 
+//     {dist=dist2;}
+//     
+//   }
+//   int lowery = 0;
+//   int uppery = dim_y;
+//   dist = uppery-lowery;
+//   while(dist>4 and check_y == true)
+//   {
+//     // cout << "lower: " << lowery << " upper: " << uppery << endl;
+//     // cout << "lower: " << grid_centers[0][lowery][1]+unit_length << " upper: " << grid_centers[0][uppery-1][1] << endl;
+//    if(grid_centers[0][lowery][1]+2*unit_length >= py and py >= grid_centers[0][uppery/2][1])  
+//     {
+//        //lowery = lowery;
+//        uppery = uppery/2;
+//     }
+//     else if(grid_centers[0][uppery/2][1] > py and py>=grid_centers[0][min(uppery,dim_y-1)][1]-unit_length)
+//     {
+//        lowery = uppery/2;
+//        //uppery = uppery;
+//     }
+//     else
+//     {break;}
+//     // stop deadlock ...
+//     dist2 = uppery-lowery;
+//     if(dist2 == dist)
+//     {break;}
+//     else 
+//     {dist=dist2;}
+//     }
+//     //cout << "lowerx: " << lowerx << " upperx: " << upperx << endl;
+//     //cout << "lowery: " << lowery << " uppery: " << uppery << endl;
+//     if(check_x == true and check_y == true)
+//     {
+//       for(int i=lowerx;i<upperx;i++)
+//       {
+//         for(int j=lowery;j<uppery;j++)
+//         {
+//            //cout << "(" << i << "," << j << ") " << point_inside_hex_with_center(p,grid_centers[i][j],unit_length) << endl; 
+//            if(point_inside_hex_with_center(p,grid_centers[i][j],unit_length)==1)
+//            {
+//             out[0]=i;out[1]=j;
+//             return out;
+//          }
+//       }
+//     }
+//   }
+//   else
+//   {
+//      if(check_x == true)
+//      {
+//         out[0] = (lowerx+upperx)/2;
+//      }
+//      
+//      if(check_y == true)
+//      {
+//         out[1] = (lowery+uppery)/2;
+//      }
+//        
+//   }
+
 
 double ***compute_grid_centers(unsigned int dim_x, unsigned int dim_y, double unit_length)
 {
@@ -406,9 +509,24 @@ int test_point_on_board()
   int *result = point_on_grid(p,dim_x,dim_y,centers,unit_length);
   if(point_inside_hex_with_center(p,centers[result[0]][result[1]],unit_length)!=1)
   {return 1;}
+  delete[] result;
   
+  double p2[2] = {20,-20};
+  
+  result = point_on_grid(p2,dim_x,dim_y,centers,unit_length);
+  // cout << "Result: " << result[0] << result[1] << endl;
+  // cout << "Center: " << centers[dim_x-1][dim_y-1][0] << " " << centers[dim_x-1][dim_y-1][1] << endl;
+  
+  if(result[0] == -1 or result[1] == -1)
+  {
+    delete[] result;
+    return 1;
+  }
+  if(point_inside_hex_with_center(p2,centers[result[0]][result[1]],unit_length)!=1)
+  {return 1;}
   
   p[0] = -1;
+  // cout << "Center: " << centers[0][0][0] << " " << centers[0][0][1] << endl;
   delete[] result;
   result = point_on_grid(p,dim_x,dim_y,centers,unit_length);
   if(result[0] != -1 and result[1] != -1)

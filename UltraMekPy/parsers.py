@@ -27,6 +27,8 @@ import xml.etree.ElementTree as ET
 
 from . import functions as fn
 
+U8 = 'utf-8-sig'
+
 class MtfParser:
     KEYS = {
         'armor',
@@ -104,6 +106,8 @@ class MtfParser:
                 result[key] = [item for item in val if item != '']
                 
         result = {fn.replace_whitespace(key,'_'):val for key,val in result.items()}
+        # add unit type since mtf files are for meks only
+        result['unit_type'] = 'Mek'
         return result
                 
     def parse_string(self,text):
@@ -112,7 +116,7 @@ class MtfParser:
         return result
         
     def parse_file(self,filename):
-        with open(filename,'r') as fp:
+        with open(filename,'r',encoding=U8) as fp:
             lines = fp.readlines()
         result = self.lines2dict(lines)
         return result
@@ -122,6 +126,10 @@ class MtfParser:
 
 class BlkParser:
     DATA_KEYWORD = "ultramekdata"
+    EXCLUDE = {
+               "block_version",
+               "version",
+               }
     
     @staticmethod
     def _remove_whitespace(text,regex):
@@ -162,12 +170,48 @@ class BlkParser:
         
         return xml_text
                 
-    
     def xml2dict(self,root):
-        pass
+        result = {}
+        for child in root:
+            key = child.tag
+            
+            if key not in self.EXCLUDE:
+                val = child.text.strip()
+                    
+                if '\n' in val:
+                    val = val.splitlines()
+                if isinstance(val,str) and val.isdigit():
+                    val = int(val)
+                elif '.' in val and val.replace('.','').isnumeric():
+                    val = fn.string2float(val)
+                if isinstance(val,list):
+                    for k,it in enumerate(val):
+                        new_it = it
+                        if new_it.isdigit():
+                            new_it = int(new_it)
+                        elif '.' in new_it and new_it.replace('.','').isnumeric():
+                            new_it = fn.string2.float(new_it)
+                        else:
+                            continue
+                        val[k] = new_it
+                        
+                result[key] = val
+        
+        return result
+        
     
     def parse_string(self,text):
-        pass
+        xml_text = self.blk2xml(text)
+        root = ET.fromstring(xml_text)
+        result = self.xml2dict(root)
+        return result
+    def parse(self,filename):
+        with open(filename,'r',encoding=U8) as fp:
+            text = fp.read()
+        return self.parse_string(text)
+    
+    def __call__(self,filename):
+        return self.parse(filename)
 
 ###################################
 # Tests                           #
@@ -190,21 +234,27 @@ class MtfTests(unittest.TestCase):
             lines = fp.readlines()
             
         result = self.mtfp.lines2dict(lines)
+        unit_type_found = False
         for key,val in result.items():
-            self.assertIn(key.replace('_',' '),MtfParser.KEYS)
+            if key != 'unit_type':
+                self.assertIn(key.replace('_',' '),MtfParser.KEYS)
+            else:
+                unit_type_found = True
+                self.assertEqual(val,"Mek")
             
             if isinstance(val,list):
                 self.assertGreater(len(val),1)
             if isinstance(val,str):
                 self.assertFalse(val.isdigit())
                 self.assertGreater(len(val),0)
+        self.assertTrue(unit_type_found)
                 
 class BlkTests(unittest.TestCase):
     
     def setUp(self):
         self.blkp = BlkParser()
         self.path = os.path.join("test","samples")
-        self.blk_files = ["Rommel Tank.blk",]
+        self.blk_files = ["Rommel Tank.blk","Rommel Tank G.blk",]
         self.blk_files = [os.path.join(self.path,f) for f in self.blk_files]
 
     def test__remove_whitespace(self):
@@ -235,17 +285,19 @@ class BlkTests(unittest.TestCase):
             text = fp.read()
             
         xml_text = self.blkp.blk2xml(text)
-        #breakpoint()
         root = ET.fromstring(xml_text)
 
     def test_xml2dict(self):
-        pass
-        #breakpoint()
-        #tree = ET.parse(self.blk_files[0])
-        #root = tree.getroot()
-        #result = self.blkp.xml2dict(root)
+        with open(self.blk_files[0],'r') as fp:
+            text = fp.read()
+        xml_text = self.blkp.blk2xml(text)
+        root = ET.fromstring(xml_text)
+        result = self.blkp.xml2dict(root)
+        self.assertEqual(result['armor'],[38, 38, 38, 24, 38])
+        self.assertEqual(result['tonnage'],65)
+        self.assertEqual(result['body_equipment'][1],'IS Ammo AC/20')
+        
         
     def test_parse(self):
-        pass
-        #result = self.blkp(self.blk_files[0])
-        #self.assertEqual(result['mass'],100)
+        result = self.blkp(self.blk_files[1])
+        self.assertEqual(result['tonnage'],65)
