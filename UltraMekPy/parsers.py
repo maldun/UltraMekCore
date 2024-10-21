@@ -20,6 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+import abc
 import os
 import re
 import unittest
@@ -29,7 +30,18 @@ from . import functions as fn
 
 U8 = 'utf-8-sig'
 
-class MtfParser:
+class Parser(abc.ABC):
+    @abc.abstractmethod
+    def parse_string(self,text):
+        raise NotImplementedError("Error: Not Implemented!")
+    def parse(self,filename):
+        with open(filename,'r',encoding=U8) as fp:
+            text = fp.read()
+        return self.parse_string(text)
+    def __call__(self,filename):
+        return self.parse(filename)
+
+class MtfParser(Parser):
     KEYS = {
         'armor',
         'capabilities',
@@ -115,16 +127,13 @@ class MtfParser:
         result = self.lines2dict(lines)
         return result
         
-    def parse_file(self,filename):
+    def parse(self,filename):
         with open(filename,'r',encoding=U8) as fp:
             lines = fp.readlines()
         result = self.lines2dict(lines)
         return result
-    
-    def __call__(self,filename):
-        return self.parse_file(filename)
 
-class BlkParser:
+class BlkParser(Parser):
     DATA_KEYWORD = "ultramekdata"
     EXCLUDE = {
                "block_version",
@@ -205,13 +214,57 @@ class BlkParser:
         root = ET.fromstring(xml_text)
         result = self.xml2dict(root)
         return result
-    def parse(self,filename):
-        with open(filename,'r',encoding=U8) as fp:
-            text = fp.read()
-        return self.parse_string(text)
     
-    def __call__(self,filename):
-        return self.parse(filename)
+
+class MulParser(Parser):
+    
+    ENTITY_KEY = "entity"
+    ENTITY_PLURAL = "entities"
+    PILOT_KEY = "pilot"
+    LOCATION_KEY = "location"
+    SLOT_KEY = "slot"
+    INDEX_KEY = "index"
+    SHOTS_KEY = "shots"
+    GAME_KEY = "game"
+    ID_KEY = "id"
+    
+    def xml2dict(self,root):
+        result = root.attrib
+        entities = {}
+        for child in root:
+            if child.tag.lower() == self.ENTITY_KEY:
+                game_id, entity = self.collect_entity(child)
+                entities[game_id] = entity
+        result[self.ENTITY_PLURAL] = entities
+        return result
+
+    def collect_entity(self,ent_root):
+        result = ent_root.attrib
+        locations = {}
+        for child in ent_root:
+            if child.tag.lower() == self.PILOT_KEY:
+                result[self.PILOT_KEY] = child.attrib
+            if child.tag.lower() == self.LOCATION_KEY:
+                ind = int(child.attrib[self.INDEX_KEY])
+                locations[ind] = child.attrib
+                locations[ind][self.LOCATION_KEY] = child.text.strip()
+                slots = {}
+                for grand_child in child:
+                    gind = int(grand_child.attrib[self.INDEX_KEY]) 
+                    slots[gind]=grand_child.attrib
+                    slots[gind][self.SHOTS_KEY] = int(slots[gind][self.SHOTS_KEY])
+                locations[ind][self.SLOT_KEY+'s'] = slots
+                result[self.LOCATION_KEY+'s'] = locations
+            if child.tag.lower() == self.GAME_KEY:
+                game_id = child.attrib[self.ID_KEY]
+                
+        return game_id, result
+    
+    def parse_string(self,text):
+        root = ET.fromstring(text)
+        result = self.xml2dict(root)
+        return result
+                
 
 ###################################
 # Tests                           #
@@ -301,3 +354,40 @@ class BlkTests(unittest.TestCase):
     def test_parse(self):
         result = self.blkp(self.blk_files[1])
         self.assertEqual(result['tonnage'],65)
+        
+class MulParserTests(unittest.TestCase):
+    
+    def setUp(self):
+        self.mulp = MulParser()
+        self.path = os.path.join("test","samples")
+        self.mul_files = ["example.mul","example2.mul"]
+        self.mul_files = [os.path.join(self.path,f) for f in self.mul_files]
+        
+    def test_collect_entity(self):
+        with open(self.mul_files[0],'r',encoding=U8) as fp:
+            text = fp.read()
+        root = ET.fromstring(text)
+        for child in root:
+            if child.tag == MulParser.ENTITY_KEY:
+                gid, result = self.mulp.collect_entity(child)
+                
+        self.assertEqual(gid,"1")
+        self.assertEqual(result['chassis'],"Atlas")
+        self.assertEqual(result['commander'],'false')
+        self.assertEqual(result['locations'][2]['location'],"Right Torso")
+        self.assertEqual(result['locations'][2]['slots'][11]['type'],"IS Ammo AC/20")
+        self.assertEqual(result['locations'][2]['slots'][11]['shots'],5)
+        
+    def test_xml2dict(self):
+        with open(self.mul_files[1],'r',encoding=U8) as fp:
+            text = fp.read()
+        
+        root = ET.fromstring(text)
+        result = self.mulp.xml2dict(root)
+        self.assertEqual(len(result["entities"]),2)
+        self.assertEqual(result['entities']["2"]["chassis"],"Rommel Tank")
+        
+    def test_parse(self):
+        result = self.mulp(self.mul_files[1])
+        self.assertEqual(len(result["entities"]),2)
+        
