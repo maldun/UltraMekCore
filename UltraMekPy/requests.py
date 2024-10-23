@@ -26,6 +26,7 @@ import os
 from . import boards
 from . import functions as fn
 from . import game
+from . import parsers as par
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -64,7 +65,11 @@ class BoardRequest(RequestProcessor):
 
 class DeploymentRequest(RequestProcessor):
     def _process(self, request, game_state):
-        return {"meks":"Atlas"}
+        forces = {}
+        mulp = par.MulParser()
+        for key, val in request.items():
+            forces[key] = mulp(val)
+        return forces
 
 rtypes = [BoardRequest,DeploymentRequest]
 
