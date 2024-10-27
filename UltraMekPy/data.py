@@ -24,6 +24,7 @@ import shutil
 import pandas as pd
 import sqlite3
 import unittest
+from copy import deepcopy
 from tempfile import mkdtemp
 from zipfile import ZipFile
 
@@ -33,6 +34,7 @@ from .parsers import MulParser, BlkParser, MtfParser
 class UnitHandler:
     MEKHQ_KEY = "mekhq_data"
     UNITS_PATH_KEY = "units"
+    CUSTOM_PATH = "custom"
     DBS_PATH = "dbs"
     MECH_PATH = "mechfiles"+os.sep
     TYPE_KEY = "type"
@@ -52,7 +54,8 @@ class UnitHandler:
     DATA_COLUMNS = [ID_KEY,NAME_KEY,DATA_KEY]
     TABLE_NAME = "entities"
     QUERY_CODE = "SELECT {} FROM {}"
-    
+    ENTITY_NOT_FOUND_MSG = "Error: Entity not found! Check if it is valid or custom unit file is missing!"
+    DB_INTEGRITY_MSG = "Error: Entry exists several time! Check DB integrity"
     """
     Class to manage unit data
     """
@@ -64,11 +67,22 @@ class UnitHandler:
             config = json.load(fp)
         self.mekhq_path = os.path.expanduser(config[self.MEKHQ_KEY])
         self.units_path = os.path.expanduser(config[self.UNITS_PATH_KEY])
+        self.custom_path = os.path.join(self.units_path,self.CUSTOM_PATH)
         self.dbs_path = os.path.join(self.units_path,self.DBS_PATH)
         
 
     def __del__(self):
         shutil.rmtree(self.dir2extract,ignore_errors = True)
+        
+    def parse_file(self,file_found):
+        if file_found.lower().endswith(self.BLK_SUFFIX):
+            parser = BlkParser()
+        elif file_found.lower().endswith(self.MTF_SUFFIX):
+            parser = MtfParser()
+            
+        result = parser(file_found)
+        return result
+        
     
     def get_entity_name(self,entity):
         """
@@ -104,12 +118,7 @@ class UnitHandler:
         else:
             return None
         
-        if file_found.lower().endswith(self.BLK_SUFFIX):
-            parser = BlkParser()
-        elif file_found.lower().endswith(self.MTF_SUFFIX):
-            parser = MtfParser()
-            
-        result = parser(file_found)
+        result = self.parse_file(file_found)
         return result
     
     def write_entity_onto_db(self,entity,category,entity_data):
@@ -126,12 +135,15 @@ class UnitHandler:
             df = pd.read_sql(self.QUERY_CODE.format(", ".join(self.DATA_COLUMNS),self.TABLE_NAME),con,index_col=self.ID_KEY)
             nr = len(df)
         
+        # check if entry exists
+        if nr>0 and len(df.index[df[self.NAME_KEY]==name])>0:
+            return df
+        
         new_row[self.ID_KEY] = nr
         new_row[self.NAME_KEY] = name
         new_row[self.DATA_KEY] = json.dumps(entity_data)
         new_row = pd.DataFrame(new_row,index=[nr])
         new_row.set_index(self.ID_KEY)
-        breakpoint()
         df = pd.concat([df,new_row])
         df.set_index(self.ID_KEY)
         con = sqlite3.connect(db_fname)
@@ -140,9 +152,25 @@ class UnitHandler:
         return df
             
     def get_entity_from_db(self,entity,category):
-        if not os.path.exists(os.join.path(self.dbs_path,category,self.SQL_SUFFIX)):
-            return False
-    
+        db_fname = os.path.join(self.dbs_path,category+self.SQL_SUFFIX)
+        if not os.path.exists(db_fname):
+            return None
+        
+        con = sqlite3.connect(db_fname)
+        df = pd.read_sql(self.QUERY_CODE.format(", ".join(self.DATA_COLUMNS),self.TABLE_NAME),con,index_col=self.ID_KEY)
+        name = self.get_entity_name(entity)
+        if len(df.index[df[self.NAME_KEY]==name]) == 0:
+            return None
+        
+        if len(df.index[df[self.NAME_KEY]==name]) > 1:
+            raise ValueError(self.DB_INTEGRITY_MSG)
+        
+        if len(df.index[df[self.NAME_KEY]==name]) == 1:
+            ind = int(df.index[df[self.NAME_KEY]==name][0])
+            data = df.iloc[ind][self.DATA_KEY]
+            data_dic = json.loads(data)
+            return data_dic
+            
     def get_category(self,entity):
         # get enity type:
         entity_type = entity[self.TYPE_KEY]
@@ -153,8 +181,41 @@ class UnitHandler:
         else:
             return None
         
+    def get_custom_entity(self,entity):
+        name = self.get_entity_name(entity)
+        for filename in os.listdir(self.custom_path):
+            fn_parts = os.path.splitext(filename)
+            if name == fn_parts[0].strip():
+                file_found = filename
+                break
+        else:
+            return None
+        
+        file_found = os.path.join(self.custom_path,file_found)
+        found_entity = self.parse_file(file_found)
+        return found_entity
+    
     def get_entity(self,entity):
-        pass
+        # first try to find custom entity
+        result = self.get_custom_entity(entity)
+        if result is not None:
+            return result
+        
+        category = self.get_category(entity)
+        #next try to find entity from db
+        result = self.get_entity_from_db(entity,category)
+        if result is not None:
+            return result
+        
+        # last but not least try getting it from MegaMek data ...
+        result = self.get_entity_from_mekhq(entity)
+        if result is None:
+            raise ValueError(self.ENTITY_NOT_FOUND_MSG)
+        # add to db for later use
+        self.write_entity_onto_db(entity,category,result)
+        return result
+        
+        
     
 class UnitHandlerTests(unittest.TestCase):
     
@@ -198,10 +259,68 @@ class UnitHandlerTests(unittest.TestCase):
         #name = self.get_entity_name(entity)
         mek_data = self.uh.get_entity_from_mekhq(entity)
         df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        name=self.uh.get_entity_name(entity)
+        self.assertEqual(df.iloc[0][self.uh.NAME_KEY],name)
         entity = self.entities["2"]
         category = "test"
         mek_data = self.uh.get_entity_from_mekhq(entity)
-        breakpoint()
+        df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        name=self.uh.get_entity_name(entity)
+        self.assertEqual(df.iloc[1][self.uh.NAME_KEY],name)
         df2 = self.uh.write_entity_onto_db(entity,category,mek_data)
+        self.assertEqual(len(df),len(df2))
     
+    def test_get_entity_from_db(self):
+        entity = self.entities["1"]
+        category = "test" #self.uh.get_category(entity)
+        #name = self.get_entity_name(entity)
+        mek_data = self.uh.get_entity_from_mekhq(entity)
+        df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        entity = self.entities["2"]
+        mek_data = self.uh.get_entity_from_mekhq(entity)
+        df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        result = self.uh.get_entity_from_db(entity,"test2")
+        self.assertFalse(result)
+        result = self.uh.get_entity_from_db(entity,category)
+        self.assertEqual(entity["chassis"],result["name"])
     
+    def test_get_custom_entity(self):
+        entity = self.entities["1"]
+        self.uh.custom_path = self.path
+        result = self.uh.get_custom_entity(entity)
+        self.assertEqual(result[self.uh.CHASSIS_KEY],'Atlas')
+        self.assertEqual(result[self.uh.MODEL_KEY],'AS7-D')
+        entity = self.entities["2"]
+        result = self.uh.get_custom_entity(entity)
+        self.assertEqual(result["name"],'Rommel Tank')
+        
+    def test_get_entity(self):
+        entity = self.entities["1"]
+        self.uh.custom_path = self.path
+        result = self.uh.get_entity(entity)
+        self.assertEqual(result[self.uh.CHASSIS_KEY],'Atlas')
+        self.assertEqual(result[self.uh.MODEL_KEY],'AS7-D')
+        category = "test" #self.uh.get_category(entity)
+        #name = self.get_entity_name(entity)
+        mek_data = self.uh.get_entity_from_mekhq(entity)
+        df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        entity = self.entities["2"]
+        mek_data = self.uh.get_entity_from_mekhq(entity)
+        df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        
+        entity = deepcopy(self.entities["2"])
+        entity["model"] = "2"
+        self.uh.TYPE2ZIP_MAP["test"] = "test.zip"
+        entity[self.uh.TYPE_KEY] = "test"
+        df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        result = self.uh.get_entity(entity)
+        self.assertEqual(result[self.uh.NAME_KEY.lower()],entity[self.uh.CHASSIS_KEY])
+        
+        entity = self.entities["2"]
+        entity[self.uh.CHASSIS_KEY]="bla mek"
+        with self.assertRaises(ValueError) as context:
+            self.uh.get_entity(entity)
+            self.assertEqual(str(context),self.uh.ENTITY_NOT_FOUND_MSG)
+        
+        
+        
