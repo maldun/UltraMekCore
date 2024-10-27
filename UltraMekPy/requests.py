@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import json
 import os 
+from copy import deepcopy
 
 from . import boards
 from . import functions as fn
@@ -63,15 +64,14 @@ class BoardRequest(RequestProcessor):
         game_state.setup_board(b)
         return j
 
-class DeploymentRequest(RequestProcessor):
+class PlayerRequest(RequestProcessor):
+    FORCES_KEY = "forces"
     def _process(self, request, game_state):
-        forces = {}
-        mulp = par.MulParser()
-        for key, val in request.items():
-            forces[key] = mulp(val)
-        return forces
+        players = game_state.setup_players(request)
+            
+        return players
 
-rtypes = [BoardRequest,DeploymentRequest]
+rtypes = [BoardRequest,PlayerRequest]
 
 request_type_map = {}
 for rtype in rtypes:

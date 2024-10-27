@@ -19,10 +19,31 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
+from copy import deepcopy
 
 from . import boards
+from . import parsers as par
+from . import data
 
 class GameState:
+    def __init__(self):
+        self.unit_handler = data.UnitHandler()
 
     def setup_board(self, board):
         self.board = board
+    
+    def process_units(self, forces):
+        # parse corrseponding mul file
+        forces = mulp(forces)
+    
+    def setup_players(self, player_request):
+        players = {}
+        mulp = par.MulParser()
+        for key, val in player_request.items():
+            val1 = deepcopy(val)
+            val1[self.FORCES_KEY] = process_units(val[self.FORCES_KEY])
+            players[key] = val1
+            
+        self.players = players
+        return players
+        
