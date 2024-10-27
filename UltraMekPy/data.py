@@ -214,6 +214,9 @@ class UnitHandler:
         # add to db for later use
         self.write_entity_onto_db(entity,category,result)
         return result
+    
+    def __call__(self,entity):
+        return self.get_entity(entity)
         
         
     

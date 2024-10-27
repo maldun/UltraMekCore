@@ -24,24 +24,33 @@ from copy import deepcopy
 from . import boards
 from . import parsers as par
 from . import data
+from . import constants as const
 
 class GameState:
+    FORCES_KEY = "forces"
     def __init__(self):
         self.unit_handler = data.UnitHandler()
+        self.mul_parser = par.MulParser()
 
     def setup_board(self, board):
         self.board = board
     
     def process_units(self, forces):
         # parse corrseponding mul file
+        mulp = self.mul_parser
         forces = mulp(forces)
+        entities = forces[mulp.ENTITY_PLURAL]
+        for ID, entity in entities.items():
+            entity_data = self.unit_handler(entity)
+            forces[mulp.ENTITY_PLURAL][ID][const.ENTITY_DATA] = entity_data
+        return forces
     
     def setup_players(self, player_request):
         players = {}
         mulp = par.MulParser()
         for key, val in player_request.items():
             val1 = deepcopy(val)
-            val1[self.FORCES_KEY] = process_units(val[self.FORCES_KEY])
+            val1[self.FORCES_KEY] = self.process_units(val[self.FORCES_KEY])
             players[key] = val1
             
         self.players = players

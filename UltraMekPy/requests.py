@@ -65,7 +65,7 @@ class BoardRequest(RequestProcessor):
         return j
 
 class PlayerRequest(RequestProcessor):
-    FORCES_KEY = "forces"
+    
     def _process(self, request, game_state):
         players = game_state.setup_players(request)
             
