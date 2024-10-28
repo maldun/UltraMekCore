@@ -23,23 +23,28 @@ import os
 import shutil
 import pandas as pd
 import sqlite3
+import shlex
 import unittest
 from copy import deepcopy
 from tempfile import mkdtemp
 from zipfile import ZipFile
 
-from .constants import CONFIG_FILE
+from .constants import CONFIG_FILE, U8
 from .parsers import MulParser, BlkParser, MtfParser
 
 class UnitHandler:
     MEKHQ_KEY = "mekhq_data"
     UNITS_PATH_KEY = "units"
     CUSTOM_PATH = "custom"
+    GFX_PATH = "gfx"
     DBS_PATH = "dbs"
     MECH_PATH = "mechfiles"+os.sep
+    IMAGE_PATH = "images"
+    UNITS_PATH = "units"
+    MISC_PATH = "misc"
     TYPE_KEY = "type"
-    TYPE2ZIP_MAP = {"biped":"mechs.zip",
-                    "tracked": "vehicles.zip"}
+    TYPE2CATEGORY_MAP = {"biped":"mechs",
+                    "tracked": "vehicles"}
     
     CHASSIS_KEY = "chassis"
     MODEL_KEY = "model"
@@ -47,6 +52,14 @@ class UnitHandler:
     BLK_SUFFIX = ".blk"
     MTF_SUFFIX = ".mtf"
     SQL_SUFFIX = ".sqlite"
+    JSO_SUFFIX = ".json"
+    ZIP_SUFFIX = ".zip"
+    
+    GFX_DATA_FILE="gfx" + JSO_SUFFIX
+    ENTITY_GFX_FILE="{name}_gfx" + JSO_SUFFIX
+    MECHSET_FILE = "mechset.txt"
+    UNKOWN_UNIT_FILE = "radarBlip.png"
+    MECHSET_KEYS = ("exact","chassis")
     
     ID_KEY = "IID"
     NAME_KEY = "NAME"
@@ -56,6 +69,10 @@ class UnitHandler:
     QUERY_CODE = "SELECT {} FROM {}"
     ENTITY_NOT_FOUND_MSG = "Error: Entity not found! Check if it is valid or custom unit file is missing!"
     DB_INTEGRITY_MSG = "Error: Entry exists several time! Check DB integrity"
+    
+    GFX_2D_IMAGE_KEY = "gfx_2d_image"
+    
+    NO_CLOSIN_MSG = "No closing quotation"
     """
     Class to manage unit data
     """
@@ -68,7 +85,13 @@ class UnitHandler:
         self.mekhq_path = os.path.expanduser(config[self.MEKHQ_KEY])
         self.units_path = os.path.expanduser(config[self.UNITS_PATH_KEY])
         self.custom_path = os.path.join(self.units_path,self.CUSTOM_PATH)
+        self.gfx_path = os.path.join(self.units_path,self.GFX_PATH)
+        self.gfx_data_file = os.path.join(self.gfx_path,self.GFX_DATA_FILE)
         self.dbs_path = os.path.join(self.units_path,self.DBS_PATH)
+        
+        if not os.path.exists(self.gfx_data_file):
+            with open(self.gfx_data_file,'w',encoding=U8) as gfp:
+                json.dump({},gfp)
         
 
     def __del__(self):
@@ -96,13 +119,13 @@ class UnitHandler:
     def get_entity_from_mekhq(self,entity):
         data_path = os.path.join(self.mekhq_path,self.MECH_PATH)
         entity_type = entity[self.TYPE_KEY]
-        if entity_type.lower() in self.TYPE2ZIP_MAP.keys():
-            zip_file = self.TYPE2ZIP_MAP[entity_type.lower()]
-            file_path = os.path.join(data_path,zip_file)
+        if entity_type.lower() in self.TYPE2CATEGORY_MAP.keys():
+            category = self.TYPE2CATEGORY_MAP[entity_type.lower()]
+            file_path = os.path.join(data_path,category+self.ZIP_SUFFIX)
         else:
             return None
         
-        tmp_path = os.path.join(self.dir2extract,os.path.splitext(zip_file)[0])
+        tmp_path = os.path.join(self.dir2extract,category)
         if not os.path.exists(tmp_path):
             shutil.unpack_archive(file_path,tmp_path)
         
@@ -174,9 +197,8 @@ class UnitHandler:
     def get_category(self,entity):
         # get enity type:
         entity_type = entity[self.TYPE_KEY]
-        if entity_type.lower() in self.TYPE2ZIP_MAP.keys():
-            category = self.TYPE2ZIP_MAP[entity_type.lower()]
-            category = os.path.splitext(category)[0]
+        if entity_type.lower() in self.TYPE2CATEGORY_MAP.keys():
+            category = self.TYPE2CATEGORY_MAP[entity_type.lower()]
             return category
         else:
             return None
@@ -213,7 +235,77 @@ class UnitHandler:
             raise ValueError(self.ENTITY_NOT_FOUND_MSG)
         # add to db for later use
         self.write_entity_onto_db(entity,category,result)
+        
         return result
+    
+    def get_gfx(self,entity):
+        name = self.get_entity_name(entity)
+        category = self.get_category(entity)
+        with open(self.gfx_data_file,'r',encoding=U8) as gfp:
+            gfx_data = json.load(gfp)
+        
+        if name not in gfx_data.keys():
+            gfx_data = self.create_new_gfx(entity,category,gfx_data)
+        
+        return gfx_data[name]
+        
+    def create_new_gfx(self,entity,category,gfx_data):
+        name = self.get_entity_name(entity)
+        entity_path = os.path.join(self.gfx_path,category,name)
+        os.makedirs(entity_path,exist_ok=True)
+        entity_gfx_file = os.path.join(entity_path,self.ENTITY_GFX_FILE.format(name=name))
+        # entry does not exist but file exists
+        if not os.path.exists(entity_gfx_file):
+            new_gfx_file = {}
+            image_path = os.path.join(self.mekhq_path,self.IMAGE_PATH)
+            image_unit_path = os.path.join(image_path,self.UNITS_PATH)
+            image_category_path = os.path.join(image_unit_path,category)
+            chassis = entity[self.CHASSIS_KEY].split(" ")[0]
+            model = entity[self.MODEL_KEY]
+            mechset = self.parse_mechset(image_unit_path)
+            if name in mechset.keys():
+                image_file = os.path.join(image_unit_path,mechset[name])
+            elif chassis in mechset.keys():
+                image_file = os.path.join(image_unit_path,mechset[chassis])
+            else:
+                image_file = os.path.join(image_path,self.MISC_PATH,self.UNKOWN_UNIT_FILE)
+            
+            new_image_file = os.path.join(entity_path,os.path.split(image_file)[1])
+            shutil.copy2(image_file,new_image_file)
+            new_gfx_file[self.GFX_2D_IMAGE_KEY] = new_image_file
+            with open(entity_gfx_file,'w',encoding=U8) as fp:
+                json.dump(new_gfx_file,fp)
+            
+        gfx_data[name] = entity_gfx_file
+        return gfx_data
+        
+    def parse_mechset(self,mechset_path):
+        # function is very simple no dedicated parser needed ...
+        mechset_file = os.path.join(mechset_path,self.MECHSET_FILE)
+        with open(mechset_file,'r',encoding=U8) as fp:
+            lines = fp.readlines()
+        
+        lines = [line for line in lines if not line.startswith('#')]
+        lines2 = []
+        for line in lines:
+           try: 
+               split_line = shlex.split(line)
+               lines2.append(split_line)
+           except ValueError as excp:
+               if str(excp) == self.NO_CLOSIN_MSG:
+                 try:
+                    split_line = shlex.split(line.strip() + '"')
+                    lines2.append(split_line)
+                 except:
+                     pass 
+           except: # politely ignore tuff that does not work ...
+                pass
+            
+        lines = lines2
+        lines = [line for line in lines if len(line)>=3]
+        lines = [line[1:3] for line in lines if line[0] in self.MECHSET_KEYS]
+        return dict(lines)
+        
     
     def __call__(self,entity):
         return self.get_entity(entity)
@@ -233,6 +325,9 @@ class UnitHandlerTests(unittest.TestCase):
         db_fname = os.path.join(self.uh.dbs_path,"test"+UnitHandler.SQL_SUFFIX)
         if os.path.exists(db_fname):
             os.remove(db_fname)
+        test_unit_path = "test/units"
+        if os.path.exists(test_unit_path):
+            shutil.rmtree(test_unit_path)
         del self.uh
         
         
@@ -313,7 +408,7 @@ class UnitHandlerTests(unittest.TestCase):
         
         entity = deepcopy(self.entities["2"])
         entity["model"] = "2"
-        self.uh.TYPE2ZIP_MAP["test"] = "test.zip"
+        self.uh.TYPE2CATEGORY_MAP["test"] = "test"
         entity[self.uh.TYPE_KEY] = "test"
         df = self.uh.write_entity_onto_db(entity,category,mek_data)
         result = self.uh.get_entity(entity)
@@ -324,6 +419,20 @@ class UnitHandlerTests(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.uh.get_entity(entity)
             self.assertEqual(str(context),self.uh.ENTITY_NOT_FOUND_MSG)
+    
+    def test_parse_mechset(self):
+        image_path = os.path.join(self.uh.mekhq_path,self.uh.IMAGE_PATH)
+        image_unit_path = os.path.join(image_path,self.uh.UNITS_PATH)
+        result = self.uh.parse_mechset(image_unit_path)
+        entity = self.entities["1"]
+        chassis = entity[self.uh.CHASSIS_KEY]
+        self.assertIn(chassis,result.keys())
         
-        
+    
+    def test_get_gfx(self):
+        #self.uh.units_path = "test/units"
+        entity = self.entities["1"]
+        result = self.uh.get_gfx(entity)
+        name = self.uh.get_entity_name(entity)
+        self.assertEqual(os.path.split(result)[1],self.uh.ENTITY_GFX_FILE.format(name=name))
         

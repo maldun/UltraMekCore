@@ -2,8 +2,8 @@
 
 <unit version="0.49.20" >
 
-		<entity chassis="Griffin" model="GRF-1N" type="Biped" commander="false" offboard="false" hidden="false" deployment="0" deploymentZone="-1" deploymentZoneWidth="3" deploymentZoneOffset="0" deploymentZoneAnyNWx="-1" deploymentZoneAnyNWy="-1" deploymentZoneAnySEx="-1" deploymentZoneAnySEy="-1" neverDeployed="true" externalId="590a7b1a-3125-4f9d-adf5-0c4551ebd69a">
-			<pilot size="1" name="Debashish Chandrasekar" nick="" gender="MALE" clanperson="false" gunnery="4" piloting="5" externalId="c7c38362-033c-4859-bb6a-11a87ad45e40" ejected="false" autoeject="true"/>
+		<entity chassis="Griffin" model="GRF-1N" type="Biped" commander="false" offboard="false" hidden="false" deployment="0" deploymentZone="-1" deploymentZoneWidth="3" deploymentZoneOffset="0" deploymentZoneAnyNWx="-1" deploymentZoneAnyNWy="-1" deploymentZoneAnySEx="-1" deploymentZoneAnySEy="-1" neverDeployed="true" externalId="475d1ebc-a76c-475a-a3aa-67f4ac300952">
+			<pilot size="1" name="Gwon-soo Sukarto" nick="" gender="MALE" clanperson="false" gunnery="4" piloting="5" portraitFile="Louisa.jpg" externalId="6e3c0b94-5f6a-472f-948d-94748032b270" ejected="false" autoeject="true"/>
       The first slot in a location is at index="1".
 			<location index="2"> Right Torso
 				<slot index="5" type="IS Ammo LRM-10" shots="12"/>

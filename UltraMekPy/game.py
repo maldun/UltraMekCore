@@ -43,6 +43,8 @@ class GameState:
         for ID, entity in entities.items():
             entity_data = self.unit_handler(entity)
             forces[mulp.ENTITY_PLURAL][ID][const.ENTITY_DATA] = entity_data
+            gfx_data = self.unit_handler.get_gfx(entity)
+            forces[mulp.ENTITY_PLURAL][ID][const.GFX_DATA] = gfx_data
         return forces
     
     def setup_players(self, player_request):

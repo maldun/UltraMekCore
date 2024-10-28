@@ -28,7 +28,7 @@ import xml.etree.ElementTree as ET
 
 from . import functions as fn
 
-U8 = 'utf-8-sig'
+from .constants import U8
 
 class Parser(abc.ABC):
     @abc.abstractmethod

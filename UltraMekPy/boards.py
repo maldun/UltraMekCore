@@ -26,6 +26,8 @@ import os
 import unittest
 from .functions import strip_and_part_line
 
+from .constants import U8
+
 @dataclass
 class Tile:
     """
@@ -70,7 +72,7 @@ class Board:
         if not os.path.exists(filename):
             raise FileNotFoundError(f"Error: File {filename} does not exist!")
 
-        with open(filename,'r') as fp:
+        with open(filename,'r',encoding=U8) as fp:
             for line in fp:
                 if line.startswith(self.SIZE_IDENTIFIER): # We assume this is always first!
                     self.size_x, self.size_y = self.get_dims(line)
