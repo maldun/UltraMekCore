@@ -272,7 +272,11 @@ class UnitHandler:
             
             new_image_file = os.path.join(entity_path,os.path.split(image_file)[1])
             shutil.copy2(image_file,new_image_file)
-            new_gfx_file[self.GFX_2D_IMAGE_KEY] = new_image_file
+            end_path = os.path.split(new_image_file)[0]
+            end_path = os.path.split(end_path)
+            end_path = os.path.split(end_path[0]) + (end_path[1],)
+            new_image_file_relative = "/".join((self.UNITS_PATH,self.GFX_PATH)+end_path[1:]+(os.path.split(image_file)[1],))
+            new_gfx_file[self.GFX_2D_IMAGE_KEY] = new_image_file_relative
             with open(entity_gfx_file,'w',encoding=U8) as fp:
                 json.dump(new_gfx_file,fp)
             
