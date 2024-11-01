@@ -166,9 +166,14 @@ class UnitHandler:
         new_row[self.NAME_KEY] = name
         new_row[self.DATA_KEY] = json.dumps(entity_data)
         new_row = pd.DataFrame(new_row,index=[nr])
-        new_row.set_index(self.ID_KEY)
-        df = pd.concat([df,new_row])
-        df.set_index(self.ID_KEY)
+        
+        if len(df)>0:
+            new_row=new_row.set_index(self.ID_KEY)
+            df = pd.concat([df,new_row])
+        else:
+            df = new_row
+            df = df.set_index(self.ID_KEY)
+        
         con = sqlite3.connect(db_fname)
         
         df.to_sql(name=self.TABLE_NAME,con=con,if_exists='replace')
@@ -322,7 +327,7 @@ class UnitHandlerTests(unittest.TestCase):
         self.mulp = MulParser()
         self.uh = UnitHandler()
         self.path = os.path.join("test","samples")
-        self.mul_files = ["example.mul","example2.mul"]
+        self.mul_files = ["example.mul","example2.mul","player1.mul"]
         self.mul_files = [os.path.join(self.path,f) for f in self.mul_files]
         self.entities = self.mulp(self.mul_files[1])[MulParser.ENTITY_PLURAL]
     def tearDown(self):
@@ -381,6 +386,8 @@ class UnitHandlerTests(unittest.TestCase):
         entity = self.entities["2"]
         mek_data = self.uh.get_entity_from_mekhq(entity)
         df = self.uh.write_entity_onto_db(entity,category,mek_data)
+        entry0 = df.iloc[0]
+        self.assertEqual(0,entry0.name)
         result = self.uh.get_entity_from_db(entity,"test2")
         self.assertFalse(result)
         result = self.uh.get_entity_from_db(entity,category)
