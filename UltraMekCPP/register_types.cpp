@@ -1,4 +1,4 @@
-#include "register_types.h"
+﻿#include "register_types.h"
 //#include "ultramek.hpp"
 #include "ultramek_gd.h"
 #include <gdextension_interface.h>

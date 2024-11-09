@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 unittests.py - unittests for UltraMek
 
 Copyright © 2024 Stefan H. Reiterer.
 stefan.harald.reiterer@gmail.com 
-This work is under GPL v2 as it should remain free but compatible with MegaMek
+This work is under GPL v2 as it should remain free but compatible with MekHQ
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -29,9 +29,9 @@ sys.path.append(os.getcwd())
 
 import unittest
 import UltraMekPy
-from UltraMekPy import boards, functions, parsers, data
+from UltraMekPy import boards, functions, parsers, data, player
 
-MODULES = [boards,data,functions,parsers]
+MODULES = [boards,data,functions,parsers,player]
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()

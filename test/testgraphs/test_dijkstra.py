@@ -1,4 +1,4 @@
-from networkx import *
+﻿from networkx import *
 from numpy import *
 nodes = []
 counter = 0

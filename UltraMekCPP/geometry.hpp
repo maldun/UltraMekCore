@@ -1,8 +1,8 @@
-// geometry.hpp - cpp geometry header for Ultramek (compatible with MegaMek)
+﻿// geometry.hpp - cpp geometry header for Ultramek (compatible with MekHQ)
 
 // Copyright © 2024 Stefan H. Reiterer.
 // stefan.harald.reiterer@gmail.com 
-// This work is under GPL v2 as it should remain free but compatible with MegaMek
+// This work is under GPL v2 as it should remain free but compatible with MekHQ
 
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

@@ -1,4 +1,4 @@
-# UltraMekCore
+﻿# UltraMekCore
 Client for UltraMek© in Python/CPP
 
 ## Install Notes
@@ -25,6 +25,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-(TL;DR: This work is under GPL v2 as it should remain free but compatible with MegaMek)
+(TL;DR: This work is under GPL v2 as it should remain free but compatible with MekHQ)
 
 Disclaimer: Used snippets of code by © Copyright 2014-2022, Juan Linietsky, Ariel Manzur and the Godot community (CC-BY 3.0)

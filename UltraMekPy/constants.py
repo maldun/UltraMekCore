@@ -1,4 +1,4 @@
-CONFIG_FILE = "config.json"
+﻿CONFIG_FILE = "config.json"
 NL = '\n'
 ENTITY_DATA = "entity_data"
 GFX_DATA = "gfx_data"

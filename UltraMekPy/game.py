@@ -1,9 +1,9 @@
-"""
-game.py - Classes and Tools for Game state and logic Handling (compatible with MegaMek)
+﻿"""
+game.py - Classes and Tools for Game state and logic Handling (compatible with MekHQ)
 
 Copyright © 2024 Stefan H. Reiterer.
 stefan.harald.reiterer@gmail.com 
-This work is under GPL v2 as it should remain free but compatible with MegaMek
+This work is under GPL v2 as it should remain free but compatible with MekHQ
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@ from . import boards
 from . import parsers as par
 from . import data
 from . import constants as const
+from .player import Player
 
 class GameState:
     FORCES_KEY = "forces"
@@ -49,11 +50,10 @@ class GameState:
     
     def setup_players(self, player_request):
         players = {}
-        mulp = par.MulParser()
         for key, val in player_request.items():
             val1 = deepcopy(val)
             val1[self.FORCES_KEY] = self.process_units(val[self.FORCES_KEY])
-            players[key] = val1
+            players[key] = Player(key,val1)
             
         self.players = players
         return players
