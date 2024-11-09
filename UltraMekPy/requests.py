@@ -68,8 +68,8 @@ class PlayerRequest(RequestProcessor):
     
     def _process(self, request, game_state):
         players = game_state.setup_players(request)
-            
-        return players
+        answer = game_state.players2dict(players)
+        return answer
 
 rtypes = [BoardRequest,PlayerRequest]
 

@@ -32,6 +32,7 @@ class GameState:
     def __init__(self):
         self.unit_handler = data.UnitHandler()
         self.mul_parser = par.MulParser()
+        self.players ={}
 
     def setup_board(self, board):
         self.board = board
@@ -57,4 +58,9 @@ class GameState:
             
         self.players = players
         return players
-        
+    
+    def players2dict(self,players=None):
+        if players is None:
+            players = self.players
+        player_data = {key:val.to_dict() for key,val in players.items()}
+        return player_data
