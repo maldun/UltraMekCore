@@ -29,9 +29,9 @@ sys.path.append(os.getcwd())
 
 import unittest
 import UltraMekPy
-from UltraMekPy import boards, functions, parsers, data, player
+from UltraMekPy import boards, functions, parsers, data, player, rolls
 
-MODULES = [boards,data,functions,parsers,player]
+MODULES = [boards,data,functions,parsers,player,rolls]
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()

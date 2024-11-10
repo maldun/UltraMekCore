@@ -59,6 +59,9 @@ class GameState:
         self.players = players
         return players
     
+    def perform_roll(self, roll_request):
+        pass
+    
     def players2dict(self,players=None):
         if players is None:
             players = self.players
