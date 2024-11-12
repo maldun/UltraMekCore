@@ -71,12 +71,10 @@ class PlayerRequest(RequestProcessor):
         answer = game_state.players2dict(players)
         return answer
     
-class RollRequest(RequestProcessor):
+class InitiativeRequest(RequestProcessor):
     
     def _process(self, request, game_state):
-        players = game_state.setup_players(request)
-        answer = game_state.players2dict(players)
-        return answer
+        pass
 
 rtypes = [BoardRequest,PlayerRequest]
 

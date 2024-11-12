@@ -32,10 +32,14 @@ class GameState:
     FORCES_KEY = "forces"
     ROLL_TYPE_KEY = "roll_type"
     ROLLS_KEY="rolls"
+    PLAYER_NAME_KEY = "player_name"
+    PLAYER_ORDER_KEY = "player_order"
+    
     def __init__(self):
         self.unit_handler = data.UnitHandler()
         self.mul_parser = par.MulParser()
         self.players ={}
+        self.player_order = []
 
     def setup_board(self, board):
         self.board = board
@@ -59,8 +63,25 @@ class GameState:
             val1[self.FORCES_KEY] = self.process_units(val[self.FORCES_KEY])
             players[key] = Player(key,val1)
             
-        self.players = players
+        self.players.update(players)
         return players
+    
+    def roll_inititive(self, initiative_request):
+        player_name = initiative_request[self.PLAYER_NAME_KEY]
+        player = self.players[player_name]
+        roll = rolls.roll_map[rolls.INITIATIVE](self,initiative_request)
+        player.initiative = roll.roll()
+        
+        answer = {}
+        initiatives = [p.initiative > 0 for p in self.players.values()]
+        if all(initiatives) is True:
+            initiatives = sorted([p for p in self.players],key=lambda x: x.initiative)
+            self.player_order = initiatives
+            inits = [p.name for p in initiatives]
+            answer[self.PLAYER_ORDER_KEY] = inits
+        return answer
+            
+        
     
     # def perform_rolls(self, roll_request):
     #     for roll_data in roll_request[self.ROLLS_KEY]:

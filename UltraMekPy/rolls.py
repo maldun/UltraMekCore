@@ -49,6 +49,7 @@ class Roll(ABC):
         return self._compute_modifiers(self.game_state,self.request_info)
     
 
+INITIATIVE = "Initiative"
 class Initiative(Roll):
     pass
 

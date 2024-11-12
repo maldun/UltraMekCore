@@ -28,6 +28,7 @@ import unittest
 class Player:
     name: str
     forces: dict
+    initiative: int = 0
 
     @property
     def name(self):
@@ -42,7 +43,15 @@ class Player:
     @forces.setter
     def forces(self,val):
         self._forces=val
-        
+    
+    @property
+    def initiative(self):
+        return self._initiative
+    
+    @initiative.setter
+    def initiative(self,val):
+        self._initiative = val
+    
     def to_dict(self):
         return self.forces
 
