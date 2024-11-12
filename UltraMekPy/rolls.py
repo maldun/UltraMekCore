@@ -28,16 +28,25 @@ class Roll(ABC):
     """
     Base class for performing rolls
     """
+    def __init__(self,game_state,request_info):
+        self.game_state = game_state
+        self.request_info = request_info
+    
     @classmethod
     def get_roll_type(cls):
         return cls.__name__
     
-    def roll(self,modifier=0,nr_dices=2):
-        result = modifier
+    def roll(self,nr_dices=2):
+        result = self.compute_modifiers()
         for _ in range(nr_dices):
             result += random.randint(1,6)
         return result
     
+    def _compute_modifiers(self,game_state,request_info):
+        return 0
+    
+    def compute_modifiers(self):
+        return self._compute_modifiers(self.game_state,self.request_info)
     
 
 class Initiative(Roll):
@@ -46,7 +55,7 @@ class Initiative(Roll):
 rtypes = [Initiative]
 roll_map = {}
 for rtype in rtypes:
-    r = rtype.get_roll_type()
+    r = rtype.get_roll_type().lower()
     roll_map[r] = rtype
 
 class RollTests(unittest.TestCase):
@@ -58,6 +67,6 @@ class RollTests(unittest.TestCase):
     def test___init__(self):
         for t,r in roll_map.items():
             self.assertIn(r().roll(),list(range(2,12+1)))
-            self.assertIn("Initiative",roll_map.keys())
+            self.assertIn("initiative",roll_map.keys())
         
 

@@ -26,9 +26,12 @@ from . import parsers as par
 from . import data
 from . import constants as const
 from .player import Player
+from . import rolls
 
 class GameState:
     FORCES_KEY = "forces"
+    ROLL_TYPE_KEY = "roll_type"
+    ROLLS_KEY="rolls"
     def __init__(self):
         self.unit_handler = data.UnitHandler()
         self.mul_parser = par.MulParser()
@@ -59,8 +62,12 @@ class GameState:
         self.players = players
         return players
     
-    def perform_roll(self, roll_request):
-        pass
+    # def perform_rolls(self, roll_request):
+    #     for roll_data in roll_request[self.ROLLS_KEY]:
+    #         roll_type = roll_data[self.ROLL_TYPE_KEY]
+    #         roll = rolls.roll_map[roll_type](self,roll_data)
+    #         roll.roll()
+        
     
     def players2dict(self,players=None):
         if players is None:
