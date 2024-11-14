@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import os
 import unittest
@@ -28,7 +28,10 @@ import unittest
 class Player:
     name: str
     forces: dict
-    initiative: int = 0
+    initiative: int = field(init=False)
+    
+    def __post_init__(self):
+        self.initiative = 0
 
     @property
     def name(self):

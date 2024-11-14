@@ -74,9 +74,10 @@ class PlayerRequest(RequestProcessor):
 class InitiativeRequest(RequestProcessor):
     
     def _process(self, request, game_state):
-        pass
+        answer = game_state.roll_initiative(request)
+        return answer
 
-rtypes = [BoardRequest,PlayerRequest]
+rtypes = [BoardRequest,PlayerRequest,InitiativeRequest]
 
 request_type_map = {}
 for rtype in rtypes:

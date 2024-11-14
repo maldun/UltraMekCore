@@ -32,8 +32,9 @@ class GameState:
     FORCES_KEY = "forces"
     ROLL_TYPE_KEY = "roll_type"
     ROLLS_KEY="rolls"
-    PLAYER_NAME_KEY = "player_name"
+    PLAYER_NAME_KEY = "player"
     PLAYER_ORDER_KEY = "player_order"
+    INITIATIVE_KEY = "initiative_rolled"
     
     def __init__(self):
         self.unit_handler = data.UnitHandler()
@@ -62,17 +63,20 @@ class GameState:
             val1 = deepcopy(val)
             val1[self.FORCES_KEY] = self.process_units(val[self.FORCES_KEY])
             players[key] = Player(key,val1)
-            
+        
         self.players.update(players)
         return players
     
-    def roll_inititive(self, initiative_request):
+    def roll_initiative(self, initiative_request):
         player_name = initiative_request[self.PLAYER_NAME_KEY]
         player = self.players[player_name]
         roll = rolls.roll_map[rolls.INITIATIVE](self,initiative_request)
         player.initiative = roll.roll()
         
         answer = {}
+        answer[self.PLAYER_NAME_KEY] = player_name
+        answer[self.INITIATIVE_KEY] = player.initiative
+        
         initiatives = [p.initiative > 0 for p in self.players.values()]
         if all(initiatives) is True:
             initiatives = sorted([p for p in self.players],key=lambda x: x.initiative)

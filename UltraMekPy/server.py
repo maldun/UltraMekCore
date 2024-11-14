@@ -27,6 +27,8 @@ from .constants import NL
 from . import requests as req
 from . import game
 
+game_state = game.GameState()
+
 class UltraMekHandler(socketserver.StreamRequestHandler):
     """
     TCP Server for UltraMek for managing games and doing stuff 
@@ -37,7 +39,7 @@ class UltraMekHandler(socketserver.StreamRequestHandler):
         self.setup_game_state()
     
     def setup_game_state(self):
-        self.game_state = game.GameState()
+        self.game_state = game_state
     
     def request_processor(self, request):
         """
