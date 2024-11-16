@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<unit version="0.49.20" >
+
+		<entity chassis="Griffin" model="GRF-1N" type="Biped" commander="false" offboard="false" hidden="false" deployment="0" deploymentZone="-1" deploymentZoneWidth="3" deploymentZoneOffset="0" deploymentZoneAnyNWx="-1" deploymentZoneAnyNWy="-1" deploymentZoneAnySEx="-1" deploymentZoneAnySEy="-1" neverDeployed="true" externalId="17dffff0-73a7-4b14-81fa-6056f96c45b1">
+			<pilot size="1" name="Greg Bo" nick="" gender="MALE" clanperson="false" gunnery="4" piloting="6" externalId="5143d673-8950-44e7-9d4d-d4323884da84" ejected="false" autoeject="true"/>
+      The first slot in a location is at index="1".
+			<location index="2"> Right Torso
+				<slot index="5" type="IS Ammo LRM-10" shots="12"/>
+				<slot index="6" type="IS Ammo LRM-10" shots="12"/>
+			</location>
+			<Game id="1"/>
+		</entity>
+
+		<entity chassis="Atlas" model="AS7-D" type="Biped" commander="false" offboard="false" hidden="false" deployment="0" deploymentZone="-1" deploymentZoneWidth="3" deploymentZoneOffset="0" deploymentZoneAnyNWx="-1" deploymentZoneAnyNWy="-1" deploymentZoneAnySEx="-1" deploymentZoneAnySEy="-1" neverDeployed="true" externalId="a1c015d8-00fd-4bf1-b08c-9a4deb547e78">
+			<pilot size="1" name="Brett Allard" nick="" gender="FEMALE" clanperson="false" gunnery="4" piloting="5" externalId="34b9b5a1-f1f1-4ad2-bd8d-b1d6ec2d7158" ejected="false" autoeject="true"/>
+      The first slot in a location is at index="1".
+			<location index="2"> Right Torso
+				<slot index="11" type="IS Ammo AC/20" shots="5"/>
+				<slot index="12" type="IS Ammo AC/20" shots="5"/>
+			</location>
+			<location index="3"> Left Torso
+				<slot index="9" type="IS Ammo LRM-20" shots="6"/>
+				<slot index="10" type="IS Ammo LRM-20" shots="6"/>
+				<slot index="11" type="IS Ammo SRM-6" shots="15"/>
+			</location>
+			<Game id="2"/>
+		</entity>
+
+</unit>

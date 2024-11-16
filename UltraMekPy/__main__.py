@@ -39,5 +39,7 @@ with socketserver.TCPServer((host,port), server.UltraMekHandler) as server:
         #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.allow_reuse_address=True
-        server.serve_forever()
+        server.serve_forever(poll_interval=0.5)
+        server.request_queue_size=40
+        server.timeout = None
 

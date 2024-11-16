@@ -55,16 +55,21 @@ class UltraMekHandler(socketserver.StreamRequestHandler):
         # self.rfile is a file-like object created by the handler;
         # we can now use e.g. readline() instead of raw recv() calls
         self.data = self.rfile.readline().strip()
-        print("{} sent:".format(self.client_address[0]))
-        request = json.loads(self.data.decode())
-        print(request)
-        result = self.request_processor(request)
-        #print(self.data)
-        # Likewise, self.wfile is a file-like object used to write back
-        # to the client
-        print("Answer: ", result)
-        #self.wfile.write(self.data.upper())
-        self.wfile.write(result.encode())
-        #self.wfile.write("Help!\n".encode())
+        print("Data: ",self.data)
+        print("{}:{} sent:".format(self.client_address[0],self.client_address[1]))
+        try:
+            request = json.loads(self.data.decode())
+            print(request)
+            result = self.request_processor(request)
+            # Likewise, self.wfile is a file-like object used to write back
+            # to the client
+            print("Answer: ", result)
+            #self.wfile.write(self.data.upper())
+            self.wfile.write(result.encode())
+            #self.wfile.write("Help!\n".encode())
+        except Exception as jerr:
+            print("Invalid Request Data!")
+            print("Data: ",self.data,"Error: ", jerr)
+            
 
 

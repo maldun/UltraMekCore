@@ -77,12 +77,15 @@ class GameState:
         answer[self.PLAYER_NAME_KEY] = player_name
         answer[self.INITIATIVE_KEY] = player.initiative
         
-        initiatives = [p.initiative > 0 for p in self.players.values()]
-        if all(initiatives) is True:
-            initiatives = sorted([p for p in self.players],key=lambda x: x.initiative)
+        initiatives = [p.initiative for p in self.players.values()]
+        
+        if all([i>0 for i in initiatives]) is True and len(initiatives) == len(set(initiatives)):
+            initiatives = sorted([p for p in self.players.values()],key=lambda x: x.initiative)
             self.player_order = initiatives
             inits = [p.name for p in initiatives]
-            answer[self.PLAYER_ORDER_KEY] = inits
+        else:
+            inits = []
+        answer[self.PLAYER_ORDER_KEY] = inits
         return answer
             
         
