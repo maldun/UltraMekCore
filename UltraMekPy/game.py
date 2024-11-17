@@ -27,6 +27,7 @@ from . import data
 from . import constants as const
 from .player import Player
 from . import rolls
+import unittest
 
 class GameState:
     FORCES_KEY = "forces"
@@ -35,6 +36,7 @@ class GameState:
     PLAYER_NAME_KEY = "player"
     PLAYER_ORDER_KEY = "player_order"
     INITIATIVE_KEY = "initiative_rolled"
+    DICES_KEY = "dices"
     
     def __init__(self):
         self.unit_handler = data.UnitHandler()
@@ -71,20 +73,24 @@ class GameState:
         player_name = initiative_request[self.PLAYER_NAME_KEY]
         player = self.players[player_name]
         roll = rolls.roll_map[rolls.INITIATIVE](self,initiative_request)
-        player.initiative = roll.roll()
+        player.initiative, dices = roll.roll()
         
         answer = {}
         answer[self.PLAYER_NAME_KEY] = player_name
         answer[self.INITIATIVE_KEY] = player.initiative
+        answer[self.DICES_KEY] = dices
         
         initiatives = [p.initiative for p in self.players.values()]
         
-        if all([i>0 for i in initiatives]) is True and len(initiatives) == len(set(initiatives)):
-            initiatives = sorted([p for p in self.players.values()],key=lambda x: x.initiative)
+        if (all([i>0 for i in initiatives]) is True) and (len(initiatives) == len(set(initiatives))):
+            initiatives = sorted([p for p in self.players.values()],key=lambda x: x.initiative,reverse=False)
             self.player_order = initiatives
             inits = [p.name for p in initiatives]
         else:
             inits = []
+            if len(initiatives) != len(set(initiatives)):
+                for player in self.players.values():
+                    player.initiative = 0
         answer[self.PLAYER_ORDER_KEY] = inits
         return answer
             
@@ -102,3 +108,24 @@ class GameState:
             players = self.players
         player_data = {key:val.to_dict() for key,val in players.items()}
         return player_data
+    
+class TestGame(unittest.TestCase):
+    def setUp(self):
+        self.game = GameState()
+        self.player_request = {"PLAYER_REQUEST":{"player1":{"Name":"Player","color":[0.5,0,0],"deployment_border":"S","forces":"test/samples/player1.mul"},
+                                                 "player2":{"Name":"Player2","color":[0,0,0.5],"deployment_border":"N","forces":"test/samples/player2.mul"}}
+                              }
+        self.initiative_requests = [{'INITIATIVE_REQUEST': {'player': 'player1'}},{"INITIATIVE_REQUEST":{"player":"player2"}}]
+        self.game.setup_players(self.player_request["PLAYER_REQUEST"])
+
+    def test_roll_initiative(self):
+        import random
+        random.seed(0)
+        answers = [self.game.roll_initiative(req['INITIATIVE_REQUEST']) for req in self.initiative_requests]
+        breakpoint()
+        self.assertEqual(answers[0]['player_order'],[])
+        if answers[0]['initiative_rolled'] > answers[1]['initiative_rolled']:
+            order = [answers[1]['player'],answers[0]['player']]
+        else:
+            order = [answers[0]['player'],answers[1]['player']]
+        self.assertEqual(order,answers[1]['player_order'])

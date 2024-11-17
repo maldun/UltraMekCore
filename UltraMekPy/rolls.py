@@ -38,9 +38,11 @@ class Roll(ABC):
     
     def roll(self,nr_dices=2):
         result = self.compute_modifiers()
-        for _ in range(nr_dices):
-            result += random.randint(1,6)
-        return result
+        eyes = [0]*nr_dices
+        for k in range(nr_dices):
+            eyes[k] = random.randint(1,6)
+            result += eyes[k]
+        return result, eyes
     
     def _compute_modifiers(self,game_state,request_info):
         return 0
@@ -64,10 +66,14 @@ class RollTests(unittest.TestCase):
     def setUp(self):
         from .game import GameState
         self.game = GameState()
+        self.requests = {INITIATIVE:{'INITIATIVE_REQUEST': {'player': 'player1'}},}
 
     def test___init__(self):
-        for t,r in roll_map.items():
-            self.assertIn(r().roll(),list(range(2,12+1)))
+        for t,R in roll_map.items():
+            r = R(self.game,self.requests[t])
+            self.assertIn(r.roll()[0],list(range(2,12+1)))
+            roll, dices = r.roll()
+            self.assertEqual(roll,sum(dices))
             self.assertIn("initiative",roll_map.keys())
         
 

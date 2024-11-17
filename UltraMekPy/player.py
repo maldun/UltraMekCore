@@ -58,6 +58,8 @@ class Player:
     def to_dict(self):
         return self.forces
 
+class Team:
+    pass
 
 class PlayerTests(unittest.TestCase):
     
