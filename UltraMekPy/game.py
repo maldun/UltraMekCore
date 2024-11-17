@@ -37,12 +37,14 @@ class GameState:
     PLAYER_ORDER_KEY = "player_order"
     INITIATIVE_KEY = "initiative_rolled"
     DICES_KEY = "dices"
+    ROUND_KEY = "round_nr"
     
     def __init__(self):
         self.unit_handler = data.UnitHandler()
         self.mul_parser = par.MulParser()
         self.players ={}
         self.player_order = []
+        self.round_nr = -1
 
     def setup_board(self, board):
         self.board = board
@@ -69,8 +71,19 @@ class GameState:
         self.players.update(players)
         return players
     
+    def set_new_round(self,round_nr):
+        self.player_order = []
+        for player in self.players.values():
+            player.initiative = 0
+        self.round_nr = round_nr
+        
+    
     def roll_initiative(self, initiative_request):
         player_name = initiative_request[self.PLAYER_NAME_KEY]
+        round_nr = initiative_request[self.ROUND_KEY]
+        if round_nr != self.round_nr:
+            self.set_new_round(round_nr)
+            
         player = self.players[player_name]
         roll = rolls.roll_map[rolls.INITIATIVE](self,initiative_request)
         player.initiative, dices = roll.roll()
