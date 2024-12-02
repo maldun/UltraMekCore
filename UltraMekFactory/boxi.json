@@ -1,0 +1,28 @@
+{
+   "head":{"mesh": {"box":{"dims":[1,1,1],"rot":[0,0,0]}},"joints":[[0,0,5],[0,0,4]],"connections":[["fix",-1],["center_torso",0]]},
+   "left_torso": null,
+   "right_torso": null,
+   "center_torso": null,
+    
+   "left_upper_arm": null,
+   "left_elbow": null,
+   "left_lower_arm": null,
+   "left_hand": null,
+    
+    "right_upper_arm": null,
+    "right_elbow": null,
+    
+    "right_lower_arm": null,
+    "left_hand": null,
+    
+    "left_upper_leg": null,
+    "left_knee": null,
+    "left_lower_leg": null,
+    "left_foot": null,
+    
+    "right_upper_leg": null,
+    "right_knee": null,
+    "right_lower_leg": null,
+    "right_foot": null,
+    "type": "biped" 
+}
