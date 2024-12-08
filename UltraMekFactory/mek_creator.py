@@ -50,7 +50,7 @@ class MekGeometry:
             if dkey.lower() == key.lower():
                 return dkey
             
-        raise KeyError("Error: Key is missing in data!")
+        raise KeyError(f"Error: Key {key} is missing in data!")
         
     def _set_data(self,data):
         for key, val in self._dic.items():
@@ -61,7 +61,7 @@ class MekGeometry:
         mesh_parts = {}
         for key, val in self._dic.items():
             if val not in MekGeometry.GENERAL_KEYS:
-                name = "_".join([self.name,key])
+                name = "_".join([self.name,val])
                 data = getattr(self,val.lower())
 
                 if data is not None:
@@ -107,7 +107,7 @@ class BipedMekGeometry(MekGeometry):
     RUA_KEY = "right_upper_arm"
     REB_KEY = "right_elbow"
     RLA_KEY = "right_lower_arm"
-    RHA_KEY = "left_hand"
+    RHA_KEY = "right_hand"
     
     LUL_KEY = "left_upper_leg"
     LKN_KEY = "left_knee"
