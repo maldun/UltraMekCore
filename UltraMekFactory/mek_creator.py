@@ -9,7 +9,7 @@ import json
 import create_mesh
 from create_mesh import MekMeshFactory, MeshPart
 
-class MekGeometry:
+class MekUnit:
     #FIX_KEY = "fixations"
     TYPE_KEY = "type"
     NAME_KEY = "name"
@@ -31,7 +31,7 @@ class MekGeometry:
             raise TypeError("Error: Data type not supported!")    
         
         self._dic = type(self)._get_key_dict()
-        self._dic.update(MekGeometry._get_key_dict())
+        self._dic.update(MekUnit._get_key_dict())
         self._set_data(data)
         self.mesh_parts = self.create_mesh_parts()
         
@@ -60,7 +60,7 @@ class MekGeometry:
     def create_mesh_parts(self):
         mesh_parts = {}
         for key, val in self._dic.items():
-            if val not in MekGeometry.GENERAL_KEYS:
+            if val not in MekUnit.GENERAL_KEYS:
                 name = "_".join([self.name,val])
                 data = getattr(self,val.lower())
 
@@ -73,7 +73,7 @@ class MekGeometry:
     
     @staticmethod
     def _create_mesh(item):
-        mesh_data = item[MekGeometry.MESH_POSKEY]
+        mesh_data = item[MekUnit.MESH_POSKEY]
         if mesh_data is None:
             return None, None
         if len(mesh_data) > 1:
@@ -84,15 +84,15 @@ class MekGeometry:
     
     @staticmethod    
     def _create_mesh_part(item,name):
-        mesh, fpoints = MekGeometry._create_mesh(item)
-        tpoints = item[MekGeometry.AXIS_POSKEY]
+        mesh, fpoints = MekUnit._create_mesh(item)
+        tpoints = item[MekUnit.AXIS_POSKEY]
         with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
             fp.write(str(mesh)+str(fpoints)+str(tpoints))
         mesh_part = MeshPart(mesh,fpoints,tpoints,name)
         return mesh_part
         
                 
-class BipedMekGeometry(MekGeometry):
+class BipedMekUnit(MekUnit):
     H_KEY = "head"
     
     LT_KEY = "left_torso"
@@ -120,7 +120,7 @@ class BipedMekGeometry(MekGeometry):
     RFO_KEY = "right_foot"
     
 if __name__ == "__main__":
-    sample_mek = BipedMekGeometry("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/boxi.json")    
+    sample_mek = BipedMekUnit("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/boxi.json")    
     
     #with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
     #    fp.write(str(sample_mek.mesh_parts))
