@@ -24,16 +24,28 @@ class MekMeshFactory:
         return bm  
     
     @staticmethod
-    def box_joints(center=(0,0,0),dims=(1,1,1),rot=(0,0,0)):
-        joints = [(center[0],center[1],dims[2]/2+center[2]),
+    def rot_line(points,rot=(0,0,0)):
+        if rot != (0,0,0):
+            eul = mathutils.Euler(rot)
+            Q = numpy.array(eul.to_matrix())
+            for k, p in enumerate(points):
+                points[k] = numpy.dot(Q,p)
+            points = [tuple(p) for p in points]
+        return points
+    
+    @staticmethod
+    def box_points(center=(0,0,0),dims=(1,1,1),rot=(0,0,0)):
+        points = [(center[0],center[1],dims[2]/2+center[2]),
                   (center[0],center[1],center[2]-dims[2]/2)]
-        return joints
+        
+        points = MekMeshFactory.rot_line(points,rot=rot)
+        return points
     
     @staticmethod
     def box(center=(0,0,0),dims=(1,1,1),rot=(0,0,0)):
         mesh = MekMeshFactory.create_box(center=center,dims=dims,rot=rot)
-        joints = MekMeshFactory.box_joints(center=center,dims=dims,rot=rot)
-        return mesh, joints
+        points = MekMeshFactory.box_points(center=center,dims=dims,rot=rot)
+        return mesh, points
         
     @staticmethod
     def create_ball(center=(0,0,0),radius=1):
@@ -126,15 +138,31 @@ class MekMeshFactory:
         mesh, joints = MekMeshFactory.creators[mtype](**mparams)
         return mesh, joints
         
-class Part:
+class MeshPart:
     """
-    Class for Mek parts.
+    Class for Mesh parts.
     bmesh: bmesh of the part
     joints: list of point representing the joints used for connections 
     """
-    def __init__(self,bm,joints):
+    def __init__(self,bm,fpoints,tpoints,name):
         self.bmesh = bm
-        elf.joints = joints
+        self.from_points = fpoints
+        self.to_points = tpoints
+        self.name = name
+        
+        if bm != None:
+            self.rotate_mesh_into_connection(self.bmesh,fpoints[0],fpoints[1],tpoints[0],tpoints[1])
+        
+    def publish(self):
+        if self.bmesh is None:
+            return None
+        
+        obj = MekMeshFactory.mesh2blender(self.bmesh,self.name)
+        return obj
+    
+    def __del__(self):
+        self.bmesh.free()
+    
     @staticmethod
     def _compute_transform_matrix(p1,p2,q1,q2):
         """
@@ -169,9 +197,10 @@ class Part:
         P, Y = numpy.linalg.qr(w2a,mode="complete")
         x = X[0]; y = Y[0]
         rot = numpy.dot(P.T,Q)*numpy.sign(x)*numpy.sign(y)
-        # translation
-        # Tp1 -> q1
-        translation_vec = numpy.array(q2) - numpy.dot(rot,p2)
+        # translation        # Tpc -> qc
+        pc = (mathutils.Vector(p2)+mathutils.Vector(p1))/2
+        qc = (mathutils.Vector(q2)+mathutils.Vector(q1))/2
+        translation_vec = numpy.array(qc) - numpy.dot(rot,pc)
         
         # convert into proper data types
         translation_vec = mathutils.Vector(translation_vec)
@@ -180,8 +209,21 @@ class Part:
         return trafo_matrix
         
     @staticmethod
-    def rotate_part_into_connection(bm,p1,p2,q1,q2):
-        pass
+    def rotate_mesh_into_connection(bm,p1,p2,q1,q2):
+        # translate center of line (p1,p2) into origin 
+        # to avoid problems with scaling
+        p1v = mathutils.Vector(p1)
+        p2v = mathutils.Vector(p2)
+        pc = (p1v+p2v)/2
+        p1s = p1v - pc
+        p2s = p2v - pc
+        T1 = MeshPart._compute_transform_matrix(p1,p2,p1s,p2s)
+        bmesh.ops.transform(bm,matrix=T1,verts=bm.verts)
+        T2 = MeshPart._compute_transform_matrix(p1s,p2s,q1,q2)
+        bmesh.ops.transform(bm,matrix=T2,verts=bm.verts)
+        return bm
+    
+    
            
 
 if __name__ == "__main__":
@@ -205,17 +247,27 @@ if __name__ == "__main__":
     box_obj = MekMeshFactory.mesh2blender(bm_box,"Box")    
     bm_box.free()    
     
-    T = Part._compute_transform_matrix((0,0,1),(0,0,-1),(1,0,0),(0,0,0))
+    
+    T = MeshPart._compute_transform_matrix((0,0,1),(0,0,-1),(1,0,0),(0,0,0))
     bm_box = MekMeshFactory.create_box(center=(0,0,0),dims=(1,2,3))
     bmesh.ops.transform(bm_box,matrix=T,verts=bm_box.verts)
     box_obj2 = MekMeshFactory.mesh2blender(bm_box,"BoxT") 
     bm_box.free()
     
-    test_data = {"box":{"dims":[1,1,3],"rot":[0,0,0]}}
-    mesh, joints = MekMeshFactory.produce(test_data)
+    test_data = {"box":{"dims":[1,1,3],"rot":[0,numpy.pi/4,0]}}
+    mesh, points = MekMeshFactory.produce(test_data)
+    
     box_obj = MekMeshFactory.mesh2blender(mesh,"Box2")    
-    mesh.free() 
+    mesh.free()
     
-    
+    pfrom = ((0,0,-2),(0,0,2))
+    pto = ((1,0,0),(0,0,0))
+    bm_box = MekMeshFactory.create_box(center=(0,0,0),dims=(1,2,4))
+    box_part = MeshPart(bm_box,pfrom,pto,"BoxPart")
+    box_part.publish()
 
+    data = {"mesh":None,"axis": [[0,-0.75,1.05],[0,-0.75,1.1]]}
+    bm = data["mesh"]
+    q1,q2 = data['axis']
+    MeshPart(bm,None,[q1,q2],'none')
     
