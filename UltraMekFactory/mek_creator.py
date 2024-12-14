@@ -8,6 +8,7 @@ sys.path.append(wpath)
 import json
 import create_mesh
 from create_mesh import MekMeshFactory, MeshPart
+from create_skeleton import MekSkeletonFactory
 
 class MekUnit:
     #FIX_KEY = "fixations"
@@ -19,7 +20,12 @@ class MekUnit:
     JOINTS_POSKEY = "joints"
     AXIS_POSKEY = "axis"
     MESH_POSKEY = "mesh"
-    
+    SKEL_POSKEY = "armature"
+    # Center for armature
+    CENTER_BONE = "armature_center"
+    PARENT_BKEY = "parent"
+    ROOT_BKEY = "root"
+    ARMATRUE_SUFFIX = "armature"
     
     def __init__(self,data):
         if isinstance(data,str):
@@ -30,10 +36,18 @@ class MekUnit:
         else:
             raise TypeError("Error: Data type not supported!")    
         
-        self._dic = type(self)._get_key_dict()
-        self._dic.update(MekUnit._get_key_dict())
-        self._set_data(data)
+        # create mesh 
+        self._meshes = type(self)._get_key_dict()
+        self._meshes.update(MekUnit._get_key_dict())
+        self._set_data(data,self._meshes)
         self.mesh_parts = self.create_mesh_parts()
+        
+        # create armature
+        self._bones = type(self)._get_key_dict(suffix="_BONE")
+        self._bones.update(MekUnit._get_key_dict(suffix="_BONE"))
+        self._set_data(data,self._bones)
+        self.skeleton = self.create_skeleton()
+        
         
     @classmethod
     def _get_key_dict(cls,suffix="_KEY"):
@@ -50,16 +64,18 @@ class MekUnit:
             if dkey.lower() == key.lower():
                 return dkey
             
-        raise KeyError(f"Error: Key {key} is missing in data!")
+        #raise KeyError(f"Error: Key {key} is missing in data!")
+        return None
         
-    def _set_data(self,data):
-        for key, val in self._dic.items():
+    def _set_data(self,data,dic):
+        for key, val in dic.items():
             dkey = self._get_data_key(val,data)
-            setattr(self,val.lower(),data[dkey])
+            dat = data[dkey] if dkey is not None else None
+            setattr(self,val.lower(),dat)            
             
     def create_mesh_parts(self):
         mesh_parts = {}
-        for key, val in self._dic.items():
+        for key, val in self._meshes.items():
             if val not in MekUnit.GENERAL_KEYS:
                 name = "_".join([self.name,val])
                 data = getattr(self,val.lower())
@@ -86,12 +102,43 @@ class MekUnit:
     def _create_mesh_part(item,name):
         mesh, fpoints = MekUnit._create_mesh(item)
         tpoints = item[MekUnit.AXIS_POSKEY]
-        with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
-            fp.write(str(mesh)+str(fpoints)+str(tpoints))
         mesh_part = MeshPart(mesh,fpoints,tpoints,name)
         return mesh_part
         
-                
+    def create_skeleton(self):
+        """
+        Creates the skeleton for the armature
+        """
+        root_name, root_data = self._get_skel_root()
+        bones = {}
+        for key, val in self._bones.items():
+            name = '_'.join([self.name,val])
+            data = getattr(self,val.lower())
+            if isinstance(data,dict) and root_name!=val:
+                bones[val.lower()] = data
+        with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
+                json.dump(root_data,fp)
+        name = self.name + "_" + self.ARMATRUE_SUFFIX
+        skel = MekSkeletonFactory.produce(name,root_data,bones)
+        return skel
+    
+    def _get_skel_root(self):
+        
+        for key, val in self._bones.items():
+            dat = getattr(self,val)
+            if dat[self.PARENT_BKEY] is None:
+                root = val
+                break
+        else:
+            raise KeyError("Error: No Root Bone defined!")
+        
+        root_bone = dat
+        center = getattr(self,self.CENTER_BONE)
+        root_data = {self.ROOT_BKEY:root,self.CENTER_BONE:center}
+        root_data.update(root_bone)
+        del root_data[self.PARENT_BKEY]
+        return root, root_data
+    
 class BipedMekUnit(MekUnit):
     H_KEY = "head"
     
@@ -118,6 +165,32 @@ class BipedMekUnit(MekUnit):
     RKN_KEY = "right_knee"
     RLL_KEY = "right_lower_leg"
     RFO_KEY = "right_foot"
+    
+    SKU_BONE = "skull"
+    NEC_BONE = "neck"
+    SPI_BONE = "spine"
+    
+    LSH_BONE = "left_shoulder"
+    LUA_BONE = "left_upper_arm_bone"
+    LLA_BONE = "left_lower_arm_bone"
+    LHA_BONE = "left_hand_bone"
+    
+    RSH_BONE = "right_shoulder"
+    RUA_BONE = "right_upper_arm_bone"
+    RLA_BONE = "right_lower_arm_bone"
+    RHA_BONE = "right_hand_bone"
+    
+    LHI_BONE = "left_hip"
+    LTH_BONE = "left_tigh"
+    LLL_BONE = "left_lower_leg_bone"
+    LFO_BONE = "left_foot_bone"
+    
+    RHI_BONE = "right_hip"
+    RTH_BONE = "right_tigh"
+    RLL_BONE = "right_lower_leg_bone"
+    RFO_BONE = "right_foot_bone"
+    
+    
     
 if __name__ == "__main__":
     sample_mek = BipedMekUnit("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/boxi.json")    

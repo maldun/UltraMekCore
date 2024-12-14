@@ -5,6 +5,24 @@ import json
 import mathutils
 import math
 import numpy
+import copy
+
+class Skeleton:
+    def __init__(self,name="my_armature",root="skull",head=(0,0,0),tail=(0,0,1),armature_center=(0,0,0)):
+        self.name = name
+        armature, arm_obj, main_bone = MekSkeletonFactory.create_armature(name,root,head=head,tail=tail,center=armature_center)
+        self.armature = armature
+        self.armature_object = arm_obj
+        setattr(self,root,main_bone)
+            
+    def add_bone(self,bone_name,head=(0,0,1),tail=(0,0,0),parent="skull"):
+        if not hasattr(self,parent):
+            return None
+        self.armature_object.data.bones[parent].select=True
+        #with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'a') as fp:
+        #    fp.write(bone_name + ': ' + str(parent_bone))
+        bone = MekSkeletonFactory.create_bone(self.armature,self.armature_object,head,tail,bone_name,parent=parent)
+        return bone
 
 class MekSkeletonFactory:
     """
@@ -15,9 +33,9 @@ class MekSkeletonFactory:
     ARMATURE_DEFAULT = "Armature"
     BONE_DEFAULT = "Bone"
     @staticmethod
-    def create_armature(name,bone_name,head=(0,0,0),tail=(0,0,1)):
+    def create_armature(name,bone_name,head=(0,0,0),tail=(0,0,1),center=(0,0,0)):
         MekSkeletonFactory.switch_on_object_mode()
-        bpy.ops.object.armature_add(location=head)
+        bpy.ops.object.armature_add(location=center)
         for arm in bpy.data.armatures:
             if arm.name == MekSkeletonFactory.ARMATURE_DEFAULT:
                 armature = arm
@@ -64,19 +82,66 @@ class MekSkeletonFactory:
         bone.head = head
         bone.tail = tail
         if parent != None:
-            bone.parent = parent
-        bone.use_connect = True
+            parent_bone = armature.edit_bones[parent]
+            bone.parent = parent_bone
+            bone.use_connect = True
         MekSkeletonFactory.switch_on_object_mode()
         return bone
+    
+    @staticmethod
+    def produce(name,root_data,bone_data):
+        skel = Skeleton(name=name,**root_data)
+        
+        bone_data = copy.deepcopy(bone_data)
+        while len(bone_data) > 0:
+            for bone_name, bone_info in bone_data.items():
+                bone = skel.add_bone(bone_name,**bone_info)
+                if bone is not None:
+                    break
+            else:
+                raise KeyError(f"Error: No bone named {bone_name}")
+            setattr(skel,bone_name,bone_data)
+            del bone_data[bone_name]
+                
+        return skel
+    
+
+            
 
 if __name__ == "__main__":
     head1 = (0,0,4.5)
     tail1 = (0,0,4)
-    armature, armature_obj, main_bone = MekSkeletonFactory.create_armature("my_armature","head",head=head1,tail=tail1)
+    armature, armature_obj, main_bone = MekSkeletonFactory.create_armature("my_armature","skull",head=head1,tail=tail1)
     #main_bone = MekSkeletonFactory.setup_bone(main_bone,head1,tail1)
     
-    head2 = (0,0,4)
-    tail2 = (0,0,3)
-    bone1 = MekSkeletonFactory.create_bone(armature,armature_obj,head2,tail2,"center_torso",parent=main_bone)
+    #head2 = (0,0,4)
+    #tail2 = (0,0,3)
+    #spine = MekSkeletonFactory.create_bone(armature,armature_obj,head2,tail2,"spine",parent=main_bone)
+    bone_data = {"neck": {"head": [0.0, 0.0, 4], "tail": [0, 0, 3.75], "parent": "skull"}, 
+                 "spine": {"head": [0.0, 0.0, 3.75], "tail": [0, 0, 2], "parent": "neck"}, 
+                 "left_shoulder": {"head": [0.0, 0.0, 3.75], "tail": [0, -1.15, 3.75], "parent": "neck"},     
+                 "left_upper_arm_bone": {"head":[0,-1.15,3.75],"tail":[0.1,-1.15,2.85],"parent":"left_shoulder"},
+                 "left_lower_arm_bone": {"head":[0.1,-1.15,2.85],"tail":[1.1,-1.15,2.85],"parent":"left_upper_arm_bone"},
+                 "left_hand_bone": {"head":[1.15,-1.15,2.85],"tail":[1.45,-1.15,2.85],"parent":"left_lower_arm_bone"},
+                 "right_shoulder": {"head": [0.0, 0.0, 3.75], "tail": [0, 1.15, 3.75], "parent": "neck"},
+                 "right_upper_arm_bone": {"head":[0,1.15,3.75],"tail":[0.1,1.15,2.85],"parent":"right_shoulder"},
+                 "right_lower_arm_bone": {"head":[0.1,1.15,2.85],"tail":[1.1,1.15,2.85],"parent":"right_upper_arm_bone"},
+                 "right_hand_bone": {"head":[1.15,1.15,2.85],"tail":[1.45,1.15,2.85],"parent":"right_lower_arm_bone"},
+                 
+                 "left_hip":  {"head": [0.0, 0.0, 2], "tail": [0,-0.75,1.9], "parent": "spine"}, 
+                 "left_tigh":  {"head": [0,-0.75,1.9], "tail": [0,-0.75,0.95], "parent": "left_hip"}, 
+                 "left_lower_leg_bone": {"head": [0,-0.75,0.95], "tail": [-0.25,-0.75,0.05], "parent": "left_tigh"}, 
+                 "left_foot_bone": {"head": [-0.25,-0.75,0.05], "tail": [0.75,-0.75,0.05], "parent": "left_lower_leg_bone"},
+                 
+                 "right_hip":  {"head": [0.0, 0.0, 2], "tail": [0,0.75,1.9], "parent": "spine"},
+                 "right_tigh":  {"head": [0,0.75,1.9], "tail": [0,0.75,0.95], "parent": "right_hip"}, 
+                 "right_lower_leg_bone": {"head": [0,0.75,0.95], "tail": [-0.25,0.75,0.05], "parent": "right_tigh"}, 
+                 "right_foot_bone": {"head": [-0.25,0.75,0.05], "tail": [0.75,0.75,0.05], "parent": "right_lower_leg_bone"},
+                 }
+    
+    root_data = {"root": "skull", "armature_center": [0, 0, 0], "head": [0.0, 0.0, 4.5], "tail": [0, 0, 4]}
+    root_name = "skull"
+    skel =  MekSkeletonFactory.produce("boxi_skel",root_data,bone_data)
+    
     
     
