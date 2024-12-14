@@ -158,6 +158,7 @@ class MeshPart:
             return None
         
         obj = MekMeshFactory.mesh2blender(self.bmesh,self.name)
+        self.obj = obj
         return obj
     
     def __del__(self):

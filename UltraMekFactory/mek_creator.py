@@ -10,6 +10,8 @@ import create_mesh
 from create_mesh import MekMeshFactory, MeshPart
 from create_skeleton import MekSkeletonFactory
 
+import bpy
+
 class MekUnit:
     #FIX_KEY = "fixations"
     TYPE_KEY = "type"
@@ -47,6 +49,9 @@ class MekUnit:
         self._bones.update(MekUnit._get_key_dict(suffix="_BONE"))
         self._set_data(data,self._bones)
         self.skeleton = self.create_skeleton()
+        
+        # link everything together
+        self.link_all()
         
         
     @classmethod
@@ -116,8 +121,8 @@ class MekUnit:
             data = getattr(self,val.lower())
             if isinstance(data,dict) and root_name!=val:
                 bones[val.lower()] = data
-        with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
-                json.dump(root_data,fp)
+        #with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
+        #        json.dump(root_data,fp)
         name = self.name + "_" + self.ARMATRUE_SUFFIX
         skel = MekSkeletonFactory.produce(name,root_data,bones)
         return skel
@@ -138,6 +143,18 @@ class MekUnit:
         root_data.update(root_bone)
         del root_data[self.PARENT_BKEY]
         return root, root_data
+    
+    def link_all(self):
+        skel = self.skeleton
+        arm = skel.get_armature()
+        for key, val in self.mesh_parts.items():
+            if val is not None:
+                obj = val.publish()
+                
+        
+        bpy.context.view_layer.objects.active = arm
+        arm.select_set(True)
+        bpy.ops.object.parent_set(type='ARMATURE_AUTO')
     
 class BipedMekUnit(MekUnit):
     H_KEY = "head"
@@ -198,8 +215,10 @@ if __name__ == "__main__":
     #with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
     #    fp.write(str(sample_mek.mesh_parts))
         
-    for key, val in sample_mek.mesh_parts.items():
-        if val is not None:
-            val.publish()
+    #for key, val in sample_mek.mesh_parts.items():
+    #    if val is not None:
+    #        val.publish()
+            
+            
             
         

@@ -23,6 +23,9 @@ class Skeleton:
         #    fp.write(bone_name + ': ' + str(parent_bone))
         bone = MekSkeletonFactory.create_bone(self.armature,self.armature_object,head,tail,bone_name,parent=parent)
         return bone
+    
+    def get_armature(self):
+        return self.armature_object
 
 class MekSkeletonFactory:
     """
