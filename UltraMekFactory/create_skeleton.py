@@ -6,6 +6,7 @@ import mathutils
 import math
 import numpy
 import copy
+import time
 
 class Skeleton:
     EULER_MODE = "XYZ"
@@ -22,7 +23,6 @@ class Skeleton:
             return None
         self.armature_object.data.bones[parent].select=True
         bone = MekSkeletonFactory.create_bone(self.armature,self.armature_object,head,tail,bone_name,parent=parent)
-        setattr(self,bone_name,bone_data)
         self._bones.update({bone_name})
         return bone
     
@@ -120,13 +120,17 @@ class MekSkeletonFactory:
                     break
             else:
                 raise KeyError(f"Error: No bone named {bone_name}")
-            
+            setattr(skel,bone_name,bone_data)
             del bone_data[bone_name]
 
         return skel
 
 class Animation:
     ANIMATION_SUFFIX="_animation"
+    ROTATION_EULER_OP = "rotation_euler"
+    LOCATION_OP = "location"
+    OPS = {ROTATION_EULER_OP,LOCATION_OP}
+    INIT_FRAME=1
     def __init__(self,animation_data):
         if isinstance(animation_data,str):
             with open(animation_data,'r') as fp:
@@ -141,10 +145,52 @@ class Animation:
         skeleton.create_animation_data(name=name)
         return skeleton
     
-
+    @staticmethod
+    def convert_op(op,data):
+        if op == Animation.ROTATION_EULER_OP:
+            data = tuple(math.radians(x) for x in data)
+        return op, data
+    
+    def apply_animation(self,skeleton):
+        if str(Animation.INIT_FRAME) not in self.animation_data.keys():
+            self._init_anim(skeleton)
+        for frame, frame_data in self.animation_data.items():
+            self.create_keyframe(skeleton,frame,frame_data)
+    
+    
+    @staticmethod
+    def _init_anim(skeleton):
+        for bone in skeleton._bones:
+            pbone = skeleton.select_bone(bone)
+            for op in Animation.OPS:
+                setattr(pbone,op,(0,0,0))
+                pbone.keyframe_insert(data_path=op,frame=Animation.INIT_FRAME)
+    
+    @staticmethod
+    def create_keyframe(skeleton,frame,keyframe_data):
+        try:
+            frame = int(frame)
+        except:
+            raise KeyError(f"Error {frame} not a valid integer!")    
+        for bone, anim_data in keyframe_data.items():
+            pbone = skeleton.select_bone(bone)
+            for op, data in anim_data.items():
+                if op not in Animation.OPS:
+                    raise ValueError(f"Error Operation {op} not allowed! Check Metadata!")
+                op, data = Animation.convert_op(op,data)
+                setattr(pbone,op,data)
+                pbone.keyframe_insert(data_path=op,frame=frame)
+            
+            
             
 
 if __name__ == "__main__":
+    
+    scene = bpy.context.scene
+    bpy.data.scenes.new("Scene")
+    bpy.data.scenes.remove(scene, do_unlink=True)
+    bpy.data.scenes[0].name = "Scene"
+    
     head1 = (0,0,4.5)
     tail1 = (0,0,4)
     armature, armature_obj, main_bone = MekSkeletonFactory.create_armature("my_armature","skull",head=head1,tail=tail1)
@@ -186,33 +232,32 @@ if __name__ == "__main__":
     skel = Animation.init_animation(skel)
     pbone = skel.select_bone("left_hand_bone")
     
-    pbone.location=(0,0,0)
-    pbone.keyframe_insert(data_path='location',frame=1)
-    pbone.rotation_euler=(0,0,0)
-    pbone.keyframe_insert(data_path='rotation_euler',frame=1)
+    #pbone.location=(0,0,0)
+    #pbone.keyframe_insert(data_path='location',frame=1)
+    #pbone.rotation_euler=(0,0,0)
+    #pbone.keyframe_insert(data_path='rotation_euler',frame=1)
     
     rotq = (1,-1.5/2,-1.5/2,-1.5/2)
-    rot = mathutils.Euler(rotq[1:])
+    #rot = mathutils.Euler(rotq[1:])
     #pbone.rotation_quaternion=(1,-1.5,-1.5,-1.5)
     
     #mloc, mrot, msca = pbone.matrix.decompose()
     #mat = mathutils.Matrix.LocRotScale(mloc, rot, (1,1,1)) # @ pbone.matrix
     #pbone.matrix=mat
-    pbone.location=(0,0,0)
-    pbone.keyframe_insert(data_path='location',frame=20)
+    #pbone.location=(0,0,0)
+    #pbone.keyframe_insert(data_path='location',frame=20)
     #pbone.rotation_quaternion = rotq
     #pbone.keyframe_insert(data_path='rotation_quaternion',frame=20)
     #pbone.rotation_mode = 'XYZ'
-    pbone.rotation_euler = rot
-    pbone.keyframe_insert(data_path='rotation_euler',frame=20)
-    
-    
+    #pbone.rotation_euler = rot
+    #pbone.keyframe_insert(data_path='rotation_euler',frame=20)
     
     #pbone.rotation_quaternion=(1,0,0,0)
     #pbone.keyframe_insert(data_path='rotation_quaternion',frame=40)
-    pbone.rotation_euler=(0,0,0)
-    pbone.keyframe_insert(data_path='rotation_euler',frame=40)
+    #pbone.rotation_euler=(0,0,0)
+    #pbone.keyframe_insert(data_path='rotation_euler',frame=40)
+
     walk_anim = Animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json")
-    
+    walk_anim.apply_animation(skel)
     
     

@@ -8,7 +8,7 @@ sys.path.append(wpath)
 import json
 import create_mesh
 from create_mesh import MekMeshFactory, MeshPart
-from create_skeleton import MekSkeletonFactory
+from create_skeleton import MekSkeletonFactory, Animation
 
 #blender packages
 import bpy
@@ -157,8 +157,9 @@ class MekUnit:
         arm.select_set(True)
         bpy.ops.object.parent_set(type='ARMATURE_AUTO')
         
-    def create_animation(self):
-        pass
+    def create_animation(self,animation_data):
+        anim = Animation(animation_data)
+        anim.apply_animation(self.skeleton)
     
 class BipedMekUnit(MekUnit):
     H_KEY = "head"
@@ -216,6 +217,11 @@ class BipedMekUnit(MekUnit):
     
     
 if __name__ == "__main__":
+    scene = bpy.context.scene
+    bpy.data.scenes.new("Scene")
+    bpy.data.scenes.remove(scene, do_unlink=True)
+    bpy.data.scenes[0].name = "Scene"
+    
     sample_mek = BipedMekUnit("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/boxi.json")    
     #breakpoint()
     
@@ -223,13 +229,11 @@ if __name__ == "__main__":
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="POSE",toggle=True)
     
-    bone_name = "left_hand_bone"
-    path = f'pose.bones["{bpy.utils.escape_identifier(bone_name)}"]'
-    sample_mek.skeleton.armature.animation_data_create()
-    sample_mek.skeleton.create_animation_data()
     #fcurves = sample_mek.skeleton.armature.animation_data.action.fcurves
     #sample_mek.skeleton.armature_object.pose.bones['left_hand_bone'].rotation_euler = mathutils.Vector((1,0,0))
+    #action=bpy.data.actions['ArmatureAction']
     #thebone=bpy.context.object.pose.bones['left_hand_bone']
     #thebone.rotation_euler=(-1.5,0.0,0.0)       
     #thebone.keyframe_insert(data_path='rotation_euler',frame=10)
-        
+    
+    sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json")
