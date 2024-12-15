@@ -8,6 +8,7 @@ import numpy
 import copy
 
 class Skeleton:
+    EULER_MODE = "XYZ"
     def __init__(self,name="my_armature",root="skull",head=(0,0,0),tail=(0,0,1),armature_center=(0,0,0)):
         self.name = name
         armature, arm_obj, main_bone = MekSkeletonFactory.create_armature(name,root,head=head,tail=tail,center=armature_center)
@@ -32,12 +33,13 @@ class Skeleton:
         self.armature_object.animation_data_create()
         self.armature_object.animation_data.action = bpy.data.actions.new(name=name)
         
-    def select_bone(self,bone_name):
+    def select_bone(self,bone_name,rotation_mode=EULER_MODE):
         bone = self.armature.bones[bone_name]
         bpy.context.object.data.bones.active = bone
         bone.select = True
         
         pbone = self.armature_object.pose.bones[bone_name]
+        pbone.rotation_mode = rotation_mode
         #bpy.context.active_pose_bone = pbone
         return pbone
          
@@ -102,7 +104,7 @@ class MekSkeletonFactory:
         if parent != None:
             parent_bone = armature.edit_bones[parent]
             bone.parent = parent_bone
-            bone.use_connect = True
+            #bone.use_connect = True
         MekSkeletonFactory.switch_on_object_mode()
         return bone
     
@@ -122,14 +124,20 @@ class MekSkeletonFactory:
             del bone_data[bone_name]
 
         return skel
-    
-class AnimationFactory:
+
+class Animation:
     ANIMATION_SUFFIX="_animation"
-    
+    def __init__(self,animation_data):
+        if isinstance(animation_data,str):
+            with open(animation_data,'r') as fp:
+                animation_data = json.load(fp)
+                
+        self.animation_data = animation_data
+        
     @staticmethod
     def init_animation(skeleton,name=None):
         if name is None:
-            name = skeleton.name + AnimationFactory.ANIMATION_SUFFIX
+            name = skeleton.name + Animation.ANIMATION_SUFFIX
         skeleton.create_animation_data(name=name)
         return skeleton
     
@@ -175,17 +183,36 @@ if __name__ == "__main__":
     print(skel._bones)
     #breakpoint()
     #skel.armature_object.bones['left_hand_bone']
-    skel = AnimationFactory.init_animation(skel)
+    skel = Animation.init_animation(skel)
     pbone = skel.select_bone("left_hand_bone")
     
-    pbone.rotation_quaternion=(1,0,0,0)
-    pbone.keyframe_insert(data_path='rotation_quaternion',frame=1)
+    pbone.location=(0,0,0)
+    pbone.keyframe_insert(data_path='location',frame=1)
+    pbone.rotation_euler=(0,0,0)
+    pbone.keyframe_insert(data_path='rotation_euler',frame=1)
     
-    pbone.rotation_quaternion=(1,-1.5,-1.5,-1.5)
-    pbone.keyframe_insert(data_path='rotation_quaternion',frame=20)
+    rotq = (1,-1.5/2,-1.5/2,-1.5/2)
+    rot = mathutils.Euler(rotq[1:])
+    #pbone.rotation_quaternion=(1,-1.5,-1.5,-1.5)
     
-    pbone.rotation_quaternion=(1,0,0,0)
-    pbone.keyframe_insert(data_path='rotation_quaternion',frame=40)
+    #mloc, mrot, msca = pbone.matrix.decompose()
+    #mat = mathutils.Matrix.LocRotScale(mloc, rot, (1,1,1)) # @ pbone.matrix
+    #pbone.matrix=mat
+    pbone.location=(0,0,0)
+    pbone.keyframe_insert(data_path='location',frame=20)
+    #pbone.rotation_quaternion = rotq
+    #pbone.keyframe_insert(data_path='rotation_quaternion',frame=20)
+    #pbone.rotation_mode = 'XYZ'
+    pbone.rotation_euler = rot
+    pbone.keyframe_insert(data_path='rotation_euler',frame=20)
+    
+    
+    
+    #pbone.rotation_quaternion=(1,0,0,0)
+    #pbone.keyframe_insert(data_path='rotation_quaternion',frame=40)
+    pbone.rotation_euler=(0,0,0)
+    pbone.keyframe_insert(data_path='rotation_euler',frame=40)
+    walk_anim = Animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json")
     
     
     
