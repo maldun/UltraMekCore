@@ -17,6 +17,8 @@
                       "joints":[[0,0,4],[0,0,2]]},
    "left_hand": {"mesh": {"box":{"dims":[0.3,0.3,0.3],"rot":[0,0,0]}},"axis": [[1.15,-1.15,2.85],[1.45,-1.15,2.85]],
                       "joints":[[0,0,4],[0,0,2]]},
+    "left_shoulder": {"mesh": {"box":{"dims":[0.5,0.5,1],"rot":[0,0,0]}},"axis": [[-0.5,-0.75,4.25],[0.5,-0.75,4.25]],
+                    "joints":[[0,0,4],[0,0,2]]},
     
     "right_upper_arm": {"mesh": {"box":{"dims":[0.25,0.25,1],"rot":[0,0,0]}},"axis": [[0,1.15,4],[0,1.15,3]],
                       "joints":[[0,0,4],[0,0,2]]},
@@ -27,6 +29,7 @@
                       "joints":[[0,0,4],[0,0,2]]},
     "right_hand": {"mesh": {"box":{"dims":[0.3,0.3,0.3],"rot":[0,0,0]}},"axis": [[1.15,1.15,2.85],[1.45,1.15,2.85]],
                       "joints":[[0,0,4],[0,0,2]]},
+    "right_shoulder":null,
     
     "left_upper_leg": {"mesh": {"box":{"dims":[0.5,0.5,0.9],"rot":[0,0,0]}},"axis": [[0,-0.75,1.9],[0,-0.75,1]],"joints":[[0,0,4],[0,0,2]]},
     "left_knee": {"mesh": null,"axis": [[0,-0.75,1],[0,-0.75,0.9]],"joints":[[0,0,4],[0,0,2]]},
@@ -42,13 +45,13 @@
     "neck": {"head":[0.0,0.0,4],"tail":[0,0,3.75],"parent":"skull"},
     "spine": {"head":[0.0,0.0,3.75],"tail":[0,0,2],"parent":"neck"},
     
-    "left_shoulder": {"head":[0.0,0.0,3.75],"tail":[0,-1.15,3.75],"parent":"neck"},
-    "left_upper_arm_bone": {"head":[0,-1.15,3.75],"tail":[0.1,-1.15,2.85],"parent":"left_shoulder"},
+    "left_shoulder_bone": {"head":[0.0,0.0,3.75],"tail":[0,-1.15,3.75],"parent":"neck"},
+    "left_upper_arm_bone": {"head":[0,-1.15,3.75],"tail":[0.1,-1.15,2.85],"parent":"left_shoulder_bone"},
     "left_lower_arm_bone": {"head":[0.1,-1.15,2.85],"tail":[1.1,-1.15,2.85],"parent":"left_upper_arm_bone"},
     "left_hand_bone": {"head":[1.15,-1.15,2.85],"tail":[1.45,-1.15,2.85],"parent":"left_lower_arm_bone"},
     
-    "right_shoulder": {"head":[0.0,0.0,3.75],"tail":[0,1.15,3.75],"parent":"neck"},
-    "right_upper_arm_bone": {"head":[0,1.15,3.75],"tail":[0.1,1.15,2.85],"parent":"right_shoulder"},
+    "right_shoulder_bone": {"head":[0.0,0.0,3.75],"tail":[0,1.15,3.75],"parent":"neck"},
+    "right_upper_arm_bone": {"head":[0,1.15,3.75],"tail":[0.1,1.15,2.85],"parent":"right_shoulder_bone"},
     "right_lower_arm_bone": {"head":[0.1,1.15,2.85],"tail":[1.1,1.15,2.85],"parent":"right_upper_arm_bone"},
     "right_hand_bone": {"head":[1.15,1.15,2.85],"tail":[1.45,1.15,2.85],"parent":"right_lower_arm_bone"},
     

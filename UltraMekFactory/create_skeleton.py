@@ -14,18 +14,33 @@ class Skeleton:
         self.armature = armature
         self.armature_object = arm_obj
         setattr(self,root,main_bone)
+        self._bones = {root}
             
     def add_bone(self,bone_name,head=(0,0,1),tail=(0,0,0),parent="skull"):
         if not hasattr(self,parent):
             return None
         self.armature_object.data.bones[parent].select=True
-        #with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'a') as fp:
-        #    fp.write(bone_name + ': ' + str(parent_bone))
         bone = MekSkeletonFactory.create_bone(self.armature,self.armature_object,head,tail,bone_name,parent=parent)
+        setattr(self,bone_name,bone_data)
+        self._bones.update({bone_name})
         return bone
     
     def get_armature(self):
         return self.armature_object
+    
+    def create_animation_data(self,name="BoneAnimation"):
+        self.armature_object.animation_data_create()
+        self.armature_object.animation_data.action = bpy.data.actions.new(name=name)
+        
+    def select_bone(self,bone_name):
+        bone = self.armature.bones[bone_name]
+        bpy.context.object.data.bones.active = bone
+        bone.select = True
+        
+        pbone = self.armature_object.pose.bones[bone_name]
+        #bpy.context.active_pose_bone = pbone
+        return pbone
+         
 
 class MekSkeletonFactory:
     """
@@ -103,10 +118,20 @@ class MekSkeletonFactory:
                     break
             else:
                 raise KeyError(f"Error: No bone named {bone_name}")
-            setattr(skel,bone_name,bone_data)
+            
             del bone_data[bone_name]
-                
+
         return skel
+    
+class AnimationFactory:
+    ANIMATION_SUFFIX="_animation"
+    
+    @staticmethod
+    def init_animation(skeleton,name=None):
+        if name is None:
+            name = skeleton.name + AnimationFactory.ANIMATION_SUFFIX
+        skeleton.create_animation_data(name=name)
+        return skeleton
     
 
             
@@ -145,6 +170,22 @@ if __name__ == "__main__":
     root_data = {"root": "skull", "armature_center": [0, 0, 0], "head": [0.0, 0.0, 4.5], "tail": [0, 0, 4]}
     root_name = "skull"
     skel =  MekSkeletonFactory.produce("boxi_skel",root_data,bone_data)
+    bpy.ops.object.mode_set(mode="POSE",toggle=True)
+    bone_name = "left_hand_bone"
+    print(skel._bones)
+    #breakpoint()
+    #skel.armature_object.bones['left_hand_bone']
+    skel = AnimationFactory.init_animation(skel)
+    pbone = skel.select_bone("left_hand_bone")
+    
+    pbone.rotation_quaternion=(1,0,0,0)
+    pbone.keyframe_insert(data_path='rotation_quaternion',frame=1)
+    
+    pbone.rotation_quaternion=(1,-1.5,-1.5,-1.5)
+    pbone.keyframe_insert(data_path='rotation_quaternion',frame=20)
+    
+    pbone.rotation_quaternion=(1,0,0,0)
+    pbone.keyframe_insert(data_path='rotation_quaternion',frame=40)
     
     
     

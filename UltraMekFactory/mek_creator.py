@@ -10,7 +10,9 @@ import create_mesh
 from create_mesh import MekMeshFactory, MeshPart
 from create_skeleton import MekSkeletonFactory
 
+#blender packages
 import bpy
+import mathutils
 
 class MekUnit:
     #FIX_KEY = "fixations"
@@ -121,8 +123,7 @@ class MekUnit:
             data = getattr(self,val.lower())
             if isinstance(data,dict) and root_name!=val:
                 bones[val.lower()] = data
-        #with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
-        #        json.dump(root_data,fp)
+
         name = self.name + "_" + self.ARMATRUE_SUFFIX
         skel = MekSkeletonFactory.produce(name,root_data,bones)
         return skel
@@ -155,6 +156,9 @@ class MekUnit:
         bpy.context.view_layer.objects.active = arm
         arm.select_set(True)
         bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+        
+    def create_animation(self):
+        pass
     
 class BipedMekUnit(MekUnit):
     H_KEY = "head"
@@ -172,11 +176,13 @@ class BipedMekUnit(MekUnit):
     REB_KEY = "right_elbow"
     RLA_KEY = "right_lower_arm"
     RHA_KEY = "right_hand"
+    RSH_KEY = "right_shoulder"
     
     LUL_KEY = "left_upper_leg"
     LKN_KEY = "left_knee"
     LLL_KEY = "left_lower_leg"
     LFO_KEY = "left_foot"
+    LSH_KEY = "left_shoulder"
     
     RUL_KEY = "right_upper_leg"
     RKN_KEY = "right_knee"
@@ -187,12 +193,12 @@ class BipedMekUnit(MekUnit):
     NEC_BONE = "neck"
     SPI_BONE = "spine"
     
-    LSH_BONE = "left_shoulder"
+    LSH_BONE = "left_shoulder_bone"
     LUA_BONE = "left_upper_arm_bone"
     LLA_BONE = "left_lower_arm_bone"
     LHA_BONE = "left_hand_bone"
     
-    RSH_BONE = "right_shoulder"
+    RSH_BONE = "right_shoulder_bone"
     RUA_BONE = "right_upper_arm_bone"
     RLA_BONE = "right_lower_arm_bone"
     RHA_BONE = "right_hand_bone"
@@ -211,14 +217,19 @@ class BipedMekUnit(MekUnit):
     
 if __name__ == "__main__":
     sample_mek = BipedMekUnit("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/boxi.json")    
+    #breakpoint()
     
-    #with open("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/log.log",'w') as fp:
-    #    fp.write(str(sample_mek.mesh_parts))
-        
-    #for key, val in sample_mek.mesh_parts.items():
-    #    if val is not None:
-    #        val.publish()
-            
-            
-            
+    arm = sample_mek.skeleton.armature_object
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="POSE",toggle=True)
+    
+    bone_name = "left_hand_bone"
+    path = f'pose.bones["{bpy.utils.escape_identifier(bone_name)}"]'
+    sample_mek.skeleton.armature.animation_data_create()
+    sample_mek.skeleton.create_animation_data()
+    #fcurves = sample_mek.skeleton.armature.animation_data.action.fcurves
+    #sample_mek.skeleton.armature_object.pose.bones['left_hand_bone'].rotation_euler = mathutils.Vector((1,0,0))
+    #thebone=bpy.context.object.pose.bones['left_hand_bone']
+    #thebone.rotation_euler=(-1.5,0.0,0.0)       
+    #thebone.keyframe_insert(data_path='rotation_euler',frame=10)
         
