@@ -130,6 +130,8 @@ class Animation:
     ROTATION_EULER_OP = "rotation_euler"
     LOCATION_OP = "location"
     OPS = {ROTATION_EULER_OP,LOCATION_OP}
+    START_CUT="start"
+    END_CUT="end"
     INIT_FRAME=1
     def __init__(self,animation_data):
         if isinstance(animation_data,str):
@@ -155,8 +157,12 @@ class Animation:
         if str(Animation.INIT_FRAME) not in self.animation_data.keys():
             self._init_anim(skeleton)
         for frame, frame_data in self.animation_data.items():
-            self.create_keyframe(skeleton,frame,frame_data)
-    
+            if frame==Animation.START_CUT:
+                bpy.context.scene.frame_start = int(frame_data)
+            elif frame==Animation.END_CUT:
+                bpy.context.scene.frame_end = int(frame_data)
+            else:
+                self.create_keyframe(skeleton,frame,frame_data)
     
     @staticmethod
     def _init_anim(skeleton):
