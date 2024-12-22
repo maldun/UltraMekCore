@@ -157,9 +157,19 @@ class MekUnit:
         arm.select_set(True)
         bpy.ops.object.parent_set(type='ARMATURE_AUTO')
         
-    def create_animation(self,animation_data):
+    def create_animation(self,animation_data,name=None,loop=True):
         anim = Animation(animation_data)
-        anim.apply_animation(self.skeleton)
+        anim.apply_animation(self.skeleton,name=name,loop=loop)
+        self.skeleton.push_action(name=name,loop=loop)
+        
+    def export_scene(self,fname):
+        bpy.ops.export_scene.gltf(filepath=fname,
+                                  check_existing=False,
+                                  export_animations=True,
+                                  export_frame_range=True,
+                                  export_frame_step=1,
+                                  export_anim_slide_to_zero=True)
+                                  
     
 class BipedMekUnit(MekUnit):
     H_KEY = "head"
@@ -236,5 +246,7 @@ if __name__ == "__main__":
     #thebone.rotation_euler=(-1.5,0.0,0.0)       
     #thebone.keyframe_insert(data_path='rotation_euler',frame=10)
     
-    #sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/run_animation.json")
-    sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json")
+    sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/run_animation.json",name="run")
+    sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json",name="walk")
+    
+    sample_mek.export_scene("/home/maldun/Games/Godot/playground/anims.glb")

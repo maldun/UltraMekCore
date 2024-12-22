@@ -42,6 +42,24 @@ class Skeleton:
         pbone.rotation_mode = rotation_mode
         #bpy.context.active_pose_bone = pbone
         return pbone
+    
+    def push_action(self,name,start=None,loop=True,):
+        """
+        Pushes an action to an NLA strip
+        """
+        obj = self.armature_object
+        action = obj.animation_data.action
+        if action is not None:
+            if start is None:
+                start = int(action.frame_range[0])
+            if loop is True:
+                name += Animation.LOOP_SUFFIX
+
+            action = obj.animation_data.action
+            track = obj.animation_data.nla_tracks.new()
+            track.name = name
+            track.strips.new(action.name, start , action)
+            obj.animation_data.action = None
          
 
 class MekSkeletonFactory:
@@ -133,6 +151,7 @@ class Animation:
     START_CUT="start"
     END_CUT="end"
     INIT_FRAME=1
+    LOOP_SUFFIX = "-loop"
     def __init__(self,animation_data):
         if isinstance(animation_data,str):
             with open(animation_data,'r') as fp:
@@ -141,9 +160,11 @@ class Animation:
         self.animation_data = animation_data
         
     @staticmethod
-    def init_animation(skeleton,name=None):
+    def init_animation(skeleton,name=None,loop=True):
         if name is None:
             name = skeleton.name + Animation.ANIMATION_SUFFIX
+        if loop is True:
+            name+=Animation.LOOP_SUFFIX
         skeleton.create_animation_data(name=name)
         return skeleton
     
@@ -153,14 +174,21 @@ class Animation:
             data = tuple(math.radians(x) for x in data)
         return op, data
     
-    def apply_animation(self,skeleton):
+    def apply_animation(self,skeleton,name=None,loop=True):
+        self.init_animation(skeleton,name=name,loop=loop)
         if str(Animation.INIT_FRAME) not in self.animation_data.keys():
             self._init_anim(skeleton)
+
+        obj = skeleton.get_armature()            
+        action = obj.animation_data.action
+        action.use_frame_range=True
         for frame, frame_data in self.animation_data.items():
             if frame==Animation.START_CUT:
-                bpy.context.scene.frame_start = int(frame_data)
+                #bpy.context.scene.frame_start = int(frame_data)
+                action.frame_start=int(frame_data)
             elif frame==Animation.END_CUT:
-                bpy.context.scene.frame_end = int(frame_data)
+                #bpy.context.scene.frame_end = int(frame_data)
+                action.frame_end = int(frame_data)
             else:
                 self.create_keyframe(skeleton,frame,frame_data)
     
@@ -235,7 +263,7 @@ if __name__ == "__main__":
     print(skel._bones)
     #breakpoint()
     #skel.armature_object.bones['left_hand_bone']
-    skel = Animation.init_animation(skel)
+    #skel = Animation.init_animation(skel)
     pbone = skel.select_bone("left_hand_bone")
     
     #pbone.location=(0,0,0)
@@ -264,6 +292,11 @@ if __name__ == "__main__":
     #pbone.keyframe_insert(data_path='rotation_euler',frame=40)
 
     walk_anim = Animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json")
-    walk_anim.apply_animation(skel)
+    walk_anim.apply_animation(skel,name='walk',loop=True)
+    skel.push_action(name='walk',start=1)
+    
+    run_anim = Animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/run_animation.json")
+    run_anim.apply_animation(skel,name='run',loop=True)
+    skel.push_action(name='run',start=1)
     
     
