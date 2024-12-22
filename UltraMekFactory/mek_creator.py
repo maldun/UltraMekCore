@@ -236,4 +236,5 @@ if __name__ == "__main__":
     #thebone.rotation_euler=(-1.5,0.0,0.0)       
     #thebone.keyframe_insert(data_path='rotation_euler',frame=10)
     
-    sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/run_animation.json")
+    #sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/run_animation.json")
+    sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json")
