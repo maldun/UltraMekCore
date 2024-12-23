@@ -25,6 +25,10 @@ class MekMeshFactory:
     
     @staticmethod
     def rot_line(points,rot=(0,0,0)):
+        """
+        Rotates a set of points (which define a line)
+        by the given roation vector (rot).
+        """
         if rot != (0,0,0):
             eul = mathutils.Euler(rot)
             Q = numpy.array(eul.to_matrix())
@@ -35,6 +39,9 @@ class MekMeshFactory:
     
     @staticmethod
     def box_points(center=(0,0,0),dims=(1,1,1),rot=(0,0,0)):
+        """
+        Creates and toates the points which determine the cube.
+        """
         points = [(center[0],center[1],dims[2]/2+center[2]),
                   (center[0],center[1],center[2]-dims[2]/2)]
         
@@ -43,6 +50,11 @@ class MekMeshFactory:
     
     @staticmethod
     def box(center=(0,0,0),dims=(1,1,1),rot=(0,0,0)):
+        """
+        Create a box mesh given by a center, dimensions (lengths of sides) 
+        and rotation vector (Euler). Returns the mesh and the points used for
+        connecting with other meshes.
+        """
         mesh = MekMeshFactory.create_box(center=center,dims=dims,rot=rot)
         points = MekMeshFactory.box_points(center=center,dims=dims,rot=rot)
         return mesh, points
@@ -57,6 +69,10 @@ class MekMeshFactory:
     
     @staticmethod
     def extrude_faces(bm, faces,height,normal=(0,0,1)):
+        """
+        Extrudes a set of faces from a mesh in direction of the normal
+        vector and returns the extruded mesh.
+        """
         reg = bmesh.ops.extrude_face_region(bm, geom=faces)
         verts = [e for e in reg['geom'] if isinstance(e, bmesh.types.BMVert)]
         
@@ -84,6 +100,11 @@ class MekMeshFactory:
     
     @staticmethod
     def move_face(bm,face,center=(0,0,0),rot=(0,0,0),matrix=None):
+        """
+        Moves a face from its center median to the given center
+        point. It also adds rotation or a transform matrix which moves
+        the faces accordingly.
+        """
         c = face.calc_center_median()
         center = mathutils.Vector(center)
         if matrix is None:
@@ -110,16 +131,34 @@ class MekMeshFactory:
     
     @staticmethod
     def join_mesh(bm1,bm2):
+        """
+        Joins two bmesh'es together to a single bmesh.
+        """
         temp_mesh = bpy.data.meshes.new(".temp")
         bm2.to_mesh(temp_mesh)
         bm1from_mesh(temp_mesh)
         bpy.data.meshes.remove(temp_mesh)
         return bm1
 
-    @staticmethod    
-    def mesh2blender(bm,obj_name="Object"):
-        me = bpy.data.meshes.new("Mesh")
+    @staticmethod
+    def bmesh2mesh(bm,name="Mesh"):
+        """
+        Creates a blender mesh from a bmesh.
+        """
+        me = bpy.data.meshes.new(name)
         bm.to_mesh(me)
+        return me
+        
+
+    @staticmethod    
+    def mesh2blender(bm,obj_name="Object",mesh=None):
+        """
+        Publishes a mesh as blender object.
+        """
+        if mesh is None:
+            me = MekMeshFactory.bmesh2mesh(bm)        
+        else:
+            me = mesh
         
         obj = bpy.data.objects.new(obj_name, me)
         bpy.context.collection.objects.link(obj)
@@ -133,6 +172,12 @@ class MekMeshFactory:
     
     @staticmethod
     def produce(data):
+        """
+        Reads data from a dictionary and creates the mesh.
+        This is WIP so nothing set in stone yet ...
+        The meta-data format is implicitely defined by the 
+        corresponding functions in the creators dictionary.
+        """
         mtype = list(data.keys())[0]
         mparams = data[mtype]
         mesh, joints = MekMeshFactory.creators[mtype](**mparams)
@@ -144,24 +189,44 @@ class MeshPart:
     bmesh: bmesh of the part
     joints: list of point representing the joints used for connections 
     """
+    MESH_SUFFIX = "_mesh"
     def __init__(self,bm,fpoints,tpoints,name):
         self.bmesh = bm
         self.from_points = fpoints
         self.to_points = tpoints
         self.name = name
+        if bm is None:
+            self.msh = None
+        else:
+            self.msh = MekMeshFactory.bmesh2mesh(self.bmesh,name=self.name+MeshPart.MESH_SUFFIX)
         
         if bm != None:
             self.rotate_mesh_into_connection(self.bmesh,fpoints[0],fpoints[1],tpoints[0],tpoints[1])
         
     def publish(self):
+        """
+        Publishes the part, i.e. a Blender object with the mesh is created.
+        """
         if self.bmesh is None:
             return None
         
-        obj = MekMeshFactory.mesh2blender(self.bmesh,self.name)
+        obj = MekMeshFactory.mesh2blender(self.bmesh,self.name,mesh=self.msh)
         self.obj = obj
         return obj
     
+    def apply_material(self,material):
+        """
+        Applies material to the part.
+        """
+        if self.msh is not None:
+            self.msh.materials.append(material)
+        
+    
     def __del__(self):
+        """
+        Frees the bmesh at end of live of the object to
+        simplify cleanup.
+        """
         self.bmesh.free()
     
     @staticmethod
@@ -223,12 +288,17 @@ class MeshPart:
         T2 = MeshPart._compute_transform_matrix(p1s,p2s,q1,q2)
         bmesh.ops.transform(bm,matrix=T2,verts=bm.verts)
         return bm
-    
+
     
            
 
 if __name__ == "__main__":
     # test MekPart Creator
+    # First clean up
+    scene = bpy.context.scene
+    bpy.data.scenes.new("Scene")
+    bpy.data.scenes.remove(scene, do_unlink=True)
+    bpy.data.scenes[0].name = "Scene"
     
     #mek = Mek()
     #mek.create_box((0,0,0),[1,2,3])
