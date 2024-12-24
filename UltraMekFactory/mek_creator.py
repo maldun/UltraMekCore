@@ -7,6 +7,7 @@ sys.path.append(wpath)
 
 import json
 import create_mesh
+from material_maker import MekMaterialFactory
 from create_mesh import MekMeshFactory, MeshPart
 from create_skeleton import MekSkeletonFactory, Animation
 
@@ -31,7 +32,7 @@ class MekUnit:
     ROOT_BKEY = "root"
     ARMATRUE_SUFFIX = "armature"
     
-    def __init__(self,data):
+    def __init__(self,data,materials=wpath+os.sep+"materials.json"):
         if isinstance(data,str):
             with open(data,'r') as fp:
                 data = json.load(fp)
@@ -46,6 +47,10 @@ class MekUnit:
         self._set_data(data,self._meshes)
         self.mesh_parts = self.create_mesh_parts()
         
+        with open(meterials,'r') as fp:
+            material_data = json.load(fp)
+        
+        
         # create armature
         self._bones = type(self)._get_key_dict(suffix="_BONE")
         self._bones.update(MekUnit._get_key_dict(suffix="_BONE"))
@@ -55,6 +60,10 @@ class MekUnit:
         # link everything together
         self.link_all()
         
+        
+    @classmethod
+    def apply_materials(material_data):
+        pass
         
     @classmethod
     def _get_key_dict(cls,suffix="_KEY"):
