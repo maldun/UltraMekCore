@@ -7,8 +7,7 @@ sys.path.append(wpath)
 
 import json
 import create_mesh
-from material_maker import MekMaterialFactory
-from create_mesh import MekMeshFactory, MeshPart
+from create_mesh import MekMeshFactory, MeshPart, MekMaterialFactory
 from create_skeleton import MekSkeletonFactory, Animation
 
 #blender packages
@@ -47,7 +46,7 @@ class MekUnit:
         self._set_data(data,self._meshes)
         self.mesh_parts = self.create_mesh_parts()
         
-        with open(meterials,'r') as fp:
+        with open(materials,'r') as fp:
             material_data = json.load(fp)
         
         
