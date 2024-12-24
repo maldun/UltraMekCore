@@ -7,12 +7,14 @@ sys.path.append(wpath)
 
 import json
 import create_mesh
-from create_mesh import MekMeshFactory, MeshPart, MekMaterialFactory
+from create_mesh import MekMeshFactory , MeshPart, MekMaterialFactory
 from create_skeleton import MekSkeletonFactory, Animation
 
 #blender packages
 import bpy
 import mathutils
+
+
 
 class MekUnit:
     #FIX_KEY = "fixations"
@@ -30,6 +32,7 @@ class MekUnit:
     PARENT_BKEY = "parent"
     ROOT_BKEY = "root"
     ARMATRUE_SUFFIX = "armature"
+    MATERIALS_KEYW = "materials"
     
     def __init__(self,data,materials=wpath+os.sep+"materials.json"):
         if isinstance(data,str):
@@ -48,7 +51,8 @@ class MekUnit:
         
         with open(materials,'r') as fp:
             material_data = json.load(fp)
-        
+        self.materials = MekMaterialFactory.create_material_dict(material_data)
+        MekUnit.apply_materials(self.mesh_parts,data,self.materials)
         
         # create armature
         self._bones = type(self)._get_key_dict(suffix="_BONE")
@@ -60,12 +64,26 @@ class MekUnit:
         self.link_all()
         
         
-    @classmethod
-    def apply_materials(material_data):
-        pass
+    @staticmethod
+    def apply_materials(parts,data,materials):
+        """
+        Applies the materials given in material_data
+        to each part defined in data.
+        """
+        for key, part in parts.items():
+            dat = data[key]
+            if dat is not None:
+                mats = dat[MekUnit.MATERIALS_KEYW]
+                for mat in mats:
+                    part.apply_material(materials[mat])
+                    
         
     @classmethod
     def _get_key_dict(cls,suffix="_KEY"):
+        """
+        Creates a dictionary of all constants ending with
+        a defined suffix (default: '_KEY')
+        """
         dic = {}
         for key, val in cls.__dict__.items():
             if key.endswith(suffix):
@@ -75,6 +93,11 @@ class MekUnit:
     
     @staticmethod
     def _get_data_key(key,data):
+        """
+        Convenience function which gets a key
+        from a dictionary even if case does not
+        match.
+        """
         for dkey in data.keys():
             if dkey.lower() == key.lower():
                 return dkey
@@ -83,12 +106,21 @@ class MekUnit:
         return None
         
     def _set_data(self,data,dic):
+        """
+        Convenience function which sets a object from
+        from a dictionary and sets its a a member to the 
+        object. Cases are ignored and the key is lower case.
+        """
         for key, val in dic.items():
             dkey = self._get_data_key(val,data)
             dat = data[dkey] if dkey is not None else None
             setattr(self,val.lower(),dat)            
             
     def create_mesh_parts(self):
+        """
+        Creates the MeshParts for the meshes
+        defined in the metadata set.
+        """
         mesh_parts = {}
         for key, val in self._meshes.items():
             if val not in MekUnit.GENERAL_KEYS:
@@ -104,6 +136,9 @@ class MekUnit:
     
     @staticmethod
     def _create_mesh(item):
+        """
+        Creates a bmesh and its signifikant points from meta data (item).
+        """
         mesh_data = item[MekUnit.MESH_POSKEY]
         if mesh_data is None:
             return None, None
@@ -115,6 +150,9 @@ class MekUnit:
     
     @staticmethod    
     def _create_mesh_part(item,name):
+        """
+        Creates a MeshPart from meta data (item) with name (name).
+        """
         mesh, fpoints = MekUnit._create_mesh(item)
         tpoints = item[MekUnit.AXIS_POSKEY]
         mesh_part = MeshPart(mesh,fpoints,tpoints,name)
@@ -137,7 +175,10 @@ class MekUnit:
         return skel
     
     def _get_skel_root(self):
-        
+        """
+        Determines the root bone of the skeleton
+        (which is created first).
+        """
         for key, val in self._bones.items():
             dat = getattr(self,val)
             if dat[self.PARENT_BKEY] is None:
@@ -154,6 +195,10 @@ class MekUnit:
         return root, root_data
     
     def link_all(self):
+        """
+        Links all bones together. Links are defined in the 
+        metadata.
+        """
         skel = self.skeleton
         arm = skel.get_armature()
         for key, val in self.mesh_parts.items():
@@ -166,17 +211,27 @@ class MekUnit:
         bpy.ops.object.parent_set(type='ARMATURE_AUTO')
         
     def create_animation(self,animation_data,name=None,loop=True):
+        """
+        Creates an animation from the metadata JSON File
+        and pushes the action to NLA actions for easier export.
+        """
         anim = Animation(animation_data)
         anim.apply_animation(self.skeleton,name=name,loop=loop)
         self.skeleton.push_action(name=name,loop=loop)
         
     def export_scene(self,fname):
+        """
+        Export the scene for use with other tools (like Godot)
+        into file (fname). Note: The current format is optimized
+        for use with Godot, other tools are currently not planned.
+        """
         bpy.ops.export_scene.gltf(filepath=fname,
                                   check_existing=False,
                                   export_animations=True,
                                   export_frame_range=True,
                                   export_frame_step=1,
-                                  export_anim_slide_to_zero=True)
+                                  export_anim_slide_to_zero=True)                
+   
                                   
     
 class BipedMekUnit(MekUnit):
@@ -232,13 +287,15 @@ class BipedMekUnit(MekUnit):
     RLL_BONE = "right_lower_leg_bone"
     RFO_BONE = "right_foot_bone"
     
-    
-    
-if __name__ == "__main__":
+
+def clear_scene():
     scene = bpy.context.scene
     bpy.data.scenes.new("Scene")
     bpy.data.scenes.remove(scene, do_unlink=True)
-    bpy.data.scenes[0].name = "Scene"
+    bpy.data.scenes[0].name = "Scene"  
+    
+if __name__ == "__main__":
+    clear_scene()
     
     sample_mek = BipedMekUnit("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/boxi.json")    
     #breakpoint()

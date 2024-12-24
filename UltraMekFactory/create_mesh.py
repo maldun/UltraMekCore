@@ -233,11 +233,11 @@ class MekMaterialFactory:
     
     
     @staticmethod
-    def create_material(material_data):
+    def create_material(name,material_data):
         """
         Creates material from data.
         """
-        name = material_data[MekMaterialFactory.NAME_MAT]
+        #name = material_data[MekMaterialFactory.NAME_MAT]
         
         mat = bpy.data.materials.new(name)
         bsdf = MekMaterialFactory.create_principled_bsdf_obj(mat)
@@ -249,9 +249,13 @@ class MekMaterialFactory:
         
     @staticmethod
     def create_material_dict(material_data_dict):
+        """
+        Create a dict with MekMAterial objects for applycation
+        on meshes.
+        """
         mat_dict = {}
         for key,val in material_data_dict.items():
-            mat = MekMaterialFactory.create_material(val)
+            mat = MekMaterialFactory.create_material(key,val)
             mat_dict[key] = mat
             
         return mat_dict
@@ -309,13 +313,13 @@ class MeshPart:
         self.from_points = fpoints
         self.to_points = tpoints
         self.name = name
+        if bm != None:
+            self.rotate_mesh_into_connection(self.bmesh,fpoints[0],fpoints[1],tpoints[0],tpoints[1])
+            
         if bm is None:
             self.msh = None
         else:
             self.msh = MekMeshFactory.bmesh2mesh(self.bmesh,name=self.name+MeshPart.MESH_SUFFIX)
-        
-        if bm != None:
-            self.rotate_mesh_into_connection(self.bmesh,fpoints[0],fpoints[1],tpoints[0],tpoints[1])
         
     def publish(self):
         """
@@ -420,7 +424,7 @@ if __name__ == "__main__":
     mat_data = {MekMaterialFactory.NAME_MAT: "mat1",
                 "base_color": (1,0,0,1)}    
     
-    mater = MekMaterialFactory.create_material(mat_data)
+    mater = MekMaterialFactory.create_material(name,mat_data)
     boxx_msh.materials.append(mater.mat)
     
     
