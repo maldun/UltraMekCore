@@ -1,0 +1,41 @@
+{
+  "40":{
+         "skull":{"rotation_euler":[0,0,0]},
+         "spine":{"rotation_euler":[0,0,0]}
+       },
+  "60":{  
+         "skull":{"rotation_euler":[0,15,0]},
+         "spine":{"rotation_euler":[0,-15,0]}
+         
+       },
+   "80":{
+         "skull":{"rotation_euler":[0,15,0]},
+         "spine":{"rotation_euler":[0,-15,0]}
+       },
+   "100":{
+         "skull":{"rotation_euler":[0,0,0]},
+         "spine":{"rotation_euler":[0,0,0]}
+       },
+    "120":{
+         "skull":{"rotation_euler":[0,0,0]},
+         "spine":{"rotation_euler":[0,0,0]}
+       },
+   "140":{
+         "skull":{"rotation_euler":[0,-15,0]},
+         "spine":{"rotation_euler":[0,15,0]}
+       },
+    "160":{
+         "skull":{"rotation_euler":[0,-15,0]},
+         "spine":{"rotation_euler":[0,15,0]}
+       },
+    "180":{
+         "skull":{"rotation_euler":[0,0,0]},
+         "spine":{"rotation_euler":[0,0,0]}
+     },
+     "start":1,
+     "end":180
+      
+    
+   
+
+}

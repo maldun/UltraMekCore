@@ -209,6 +209,7 @@ class MekUnit:
         bpy.context.view_layer.objects.active = arm
         arm.select_set(True)
         bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+        #bpy.ops.object.parent_set(type='ARMATURE_ENVELOPE')
         
     def create_animation(self,animation_data,name=None,loop=True):
         """
@@ -311,7 +312,9 @@ if __name__ == "__main__":
     #thebone.rotation_euler=(-1.5,0.0,0.0)       
     #thebone.keyframe_insert(data_path='rotation_euler',frame=10)
     
+    sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/idle_animation.json",name="idle")
     sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/run_animation.json",name="run")
     sample_mek.create_animation("/home/maldun/Games/Godot/UltraMek/UltraMekCore/UltraMekFactory/walk_animation.json",name="walk")
+    
     
     sample_mek.export_scene("/home/maldun/Games/Godot/playground/anims.glb")
