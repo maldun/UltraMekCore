@@ -59,6 +59,8 @@ class UnitHandler:
     ENTITY_GFX_FILE="{name}_gfx" + JSO_SUFFIX
     MECHSET_FILE = "mechset.txt"
     UNKOWN_UNIT_FILE = "radarBlip.png"
+    STANDEE_GFX = "Standee_gfx" + JSO_SUFFIX
+    STANDEE_PATH = "Standee"
     MECHSET_KEYS = ("exact","chassis")
     
     ID_KEY = "IID"
@@ -71,6 +73,8 @@ class UnitHandler:
     DB_INTEGRITY_MSG = "Error: Entry exists several time! Check DB integrity"
     
     GFX_2D_IMAGE_KEY = "gfx_2d_image"
+    GFX_3D_ANIMATION_KEY = "gfx_3d_animations"
+    DEFAULT_CAMEO_KEY = "Default"
     
     NO_CLOSIN_MSG = "No closing quotation"
     """
@@ -282,6 +286,18 @@ class UnitHandler:
             end_path = os.path.split(end_path[0]) + (end_path[1],)
             new_image_file_relative = "/".join((self.UNITS_PATH,self.GFX_PATH)+end_path[1:]+(os.path.split(image_file)[1],))
             new_gfx_file[self.GFX_2D_IMAGE_KEY] = new_image_file_relative
+            standee_path = os.path.join(self.gfx_path,category,self.STANDEE_PATH) 
+            with open(os.path.join(standee_path,self.STANDEE_GFX),'r',encoding=U8) as fp:
+                standee_data = json.load(fp)
+                anim_data = standee_data[self.GFX_3D_ANIMATION_KEY]
+            units_base = os.path.split(os.path.split(self.units_path)[0])[0]
+            for key, value in anim_data[self.DEFAULT_CAMEO_KEY].items():
+                fname = os.path.join(units_base,value)
+                new_fname = os.path.join(entity_path,os.path.split(fname)[1])
+                if not os.path.exists(new_fname):
+                    shutil.copy2(fname,new_fname)
+                
+            new_gfx_file[self.GFX_3D_ANIMATION_KEY] = anim_data
             with open(entity_gfx_file,'w',encoding=U8) as fp:
                 json.dump(new_gfx_file,fp)
             
