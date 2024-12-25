@@ -54,6 +54,7 @@ class UnitHandler:
     SQL_SUFFIX = ".sqlite"
     JSO_SUFFIX = ".json"
     ZIP_SUFFIX = ".zip"
+    GLB_SUFFIX = ".glb"
     
     GFX_DATA_FILE="gfx" + JSO_SUFFIX
     ENTITY_GFX_FILE="{name}_gfx" + JSO_SUFFIX
@@ -286,18 +287,23 @@ class UnitHandler:
             end_path = os.path.split(end_path[0]) + (end_path[1],)
             new_image_file_relative = "/".join((self.UNITS_PATH,self.GFX_PATH)+end_path[1:]+(os.path.split(image_file)[1],))
             new_gfx_file[self.GFX_2D_IMAGE_KEY] = new_image_file_relative
+            # get 3d animation data
             standee_path = os.path.join(self.gfx_path,category,self.STANDEE_PATH) 
             with open(os.path.join(standee_path,self.STANDEE_GFX),'r',encoding=U8) as fp:
                 standee_data = json.load(fp)
                 anim_data = standee_data[self.GFX_3D_ANIMATION_KEY]
             units_base = os.path.split(os.path.split(self.units_path)[0])[0]
+            new_anim_data = {}
             for key, value in anim_data[self.DEFAULT_CAMEO_KEY].items():
                 fname = os.path.join(units_base,value)
-                new_fname = os.path.join(entity_path,os.path.split(fname)[1])
-                if not os.path.exists(new_fname):
-                    shutil.copy2(fname,new_fname)
-                
-            new_gfx_file[self.GFX_3D_ANIMATION_KEY] = anim_data
+                new_fname = '_'.join([name,"standee"])+self.GLB_SUFFIX
+                new_fname = new_fname.replace(" ","_")
+                new_path = os.path.join(entity_path,new_fname)
+                if not os.path.exists(new_path):
+                    shutil.copy2(fname,new_path)
+                new_anim_data[key] = os.path.join(self.UNITS_PATH,self.GFX_PATH,category,new_fname)
+            new_anim_data = {self.DEFAULT_CAMEO_KEY:new_anim_data}
+            new_gfx_file[self.GFX_3D_ANIMATION_KEY] = new_anim_data
             with open(entity_gfx_file,'w',encoding=U8) as fp:
                 json.dump(new_gfx_file,fp)
             
