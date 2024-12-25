@@ -33,6 +33,13 @@ class MekUnit:
     ROOT_BKEY = "root"
     ARMATRUE_SUFFIX = "armature"
     MATERIALS_KEYW = "materials"
+    PARTS_KEYW = "parts"
+    BONES_KEYW = "bones"
+    COLLECTION_KEYWS = {PARTS_KEYW, BONES_KEYW}
+    AUTO_MODE = 'ARMATURE_AUTO'
+    ENVELOPE_MODE = 'ARMATURE_ENVELOPE'
+    ARMATURE_MODES = {'auto':AUTO_MODE,'envelope':ENVELOPE_MODE}
+    ARMATURE_MODE_KEYW = "armature_mode"
     
     def __init__(self,data,materials=wpath+os.sep+"materials.json"):
         if isinstance(data,str):
@@ -43,27 +50,48 @@ class MekUnit:
         else:
             raise TypeError("Error: Data type not supported!")    
         
-        # create mesh 
-        self._meshes = type(self)._get_key_dict()
-        self._meshes.update(MekUnit._get_key_dict())
-        self._set_data(data,self._meshes)
-        self.mesh_parts = self.create_mesh_parts()
+        # create mesh
+        part_data = data[MekUnit.PARTS_KEYW]
+        self._meshes = type(self)._get_key_dict() # get default keys for class
+        MekUnit._key_check(self._meshes,part_data) # check if minimal set of keys is avaiailable
+        self._meshes.update(MekUnit._get_key_dict()) # get default keys for base class
+        
+        # set common data
+        self._set_data({key:val for key,val in data.items() if key not in MekUnit.COLLECTION_KEYWS})
+        # set part data
+        self._set_data(part_data)
+        # create parts
+        self.mesh_parts = self.create_mesh_parts(part_data)
+        self.part_data = part_data
         
         with open(materials,'r') as fp:
             material_data = json.load(fp)
         self.materials = MekMaterialFactory.create_material_dict(material_data)
-        MekUnit.apply_materials(self.mesh_parts,data,self.materials)
+        MekUnit.apply_materials(self.mesh_parts,part_data,self.materials)
         
         # create armature
+        bone_data = data[MekUnit.BONES_KEYW]
         self._bones = type(self)._get_key_dict(suffix="_BONE")
+        MekUnit._key_check(self._bones,bone_data) # check if minimal set of keys is avaiailable
         self._bones.update(MekUnit._get_key_dict(suffix="_BONE"))
-        self._set_data(data,self._bones)
-        self.skeleton = self.create_skeleton()
+        self._set_data(bone_data)
+        self.skeleton = self.create_skeleton(bone_data)
         
         # link everything together
-        self.link_all()
+        self.link_all(mode=getattr(self,MekUnit.ARMATURE_MODE_KEYW))
         
-        
+    
+    @staticmethod
+    def _key_check(default_dict,dict2):
+        """
+        Checkis if dict2 has all keys of default_dict and merges both
+        """
+        common = set(default_dict.values()) & set(dict2.keys())
+        difference = set(default_dict.values()) - set(dict2.keys())
+        if len(default_dict.keys())!=len(common):
+            missing = ', '.join(list(difference))
+            raise ValueError("Error! Keys" + missing + " missing!")
+    
     @staticmethod
     def apply_materials(parts,data,materials):
         """
@@ -105,32 +133,32 @@ class MekUnit:
         #raise KeyError(f"Error: Key {key} is missing in data!")
         return None
         
-    def _set_data(self,data,dic):
+    def _set_data(self,data):
         """
         Convenience function which sets a object from
         from a dictionary and sets its a a member to the 
         object. Cases are ignored and the key is lower case.
         """
-        for key, val in dic.items():
-            dkey = self._get_data_key(val,data)
+        for key, val in data.items():
+            dkey = self._get_data_key(key,data)
             dat = data[dkey] if dkey is not None else None
-            setattr(self,val.lower(),dat)            
+            setattr(self,key.lower(),dat)            
             
-    def create_mesh_parts(self):
+    def create_mesh_parts(self,part_dict):
         """
         Creates the MeshParts for the meshes
         defined in the metadata set.
         """
         mesh_parts = {}
-        for key, val in self._meshes.items():
-            if val not in MekUnit.GENERAL_KEYS:
-                name = "_".join([self.name,val])
-                data = getattr(self,val.lower())
+        for key, val in part_dict.items():
+            if key not in MekUnit.GENERAL_KEYS:
+                name = "_".join([self.name,key])
+                data = getattr(self,key.lower())
 
                 if data is not None:
-                    mesh_parts[val] = self._create_mesh_part(data,name)
+                    mesh_parts[key] = self._create_mesh_part(data,name)
                 else:
-                    mesh_parts[val] = None
+                    mesh_parts[key] = None
                 
         return mesh_parts
     
@@ -158,17 +186,17 @@ class MekUnit:
         mesh_part = MeshPart(mesh,fpoints,tpoints,name)
         return mesh_part
         
-    def create_skeleton(self):
+    def create_skeleton(self,bone_data):
         """
         Creates the skeleton for the armature
         """
         root_name, root_data = self._get_skel_root()
         bones = {}
-        for key, val in self._bones.items():
-            name = '_'.join([self.name,val])
-            data = getattr(self,val.lower())
-            if isinstance(data,dict) and root_name!=val:
-                bones[val.lower()] = data
+        for key, val in bone_data.items():
+            name = '_'.join([self.name,key])
+            data = getattr(self,key.lower())
+            if isinstance(data,dict) and root_name!=key:
+                bones[key.lower()] = data
 
         name = self.name + "_" + self.ARMATRUE_SUFFIX
         skel = MekSkeletonFactory.produce(name,root_data,bones)
@@ -194,7 +222,7 @@ class MekUnit:
         del root_data[self.PARENT_BKEY]
         return root, root_data
     
-    def link_all(self):
+    def link_all(self,mode='ARMATURE_AUTO'):
         """
         Links all bones together. Links are defined in the 
         metadata.
