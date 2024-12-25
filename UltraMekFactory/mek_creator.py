@@ -78,7 +78,8 @@ class MekUnit:
         self.skeleton = self.create_skeleton(bone_data)
         
         # link everything together
-        self.link_all(mode=getattr(self,MekUnit.ARMATURE_MODE_KEYW))
+        arm_mode = getattr(self,MekUnit.ARMATURE_MODE_KEYW)
+        self.link_all(mode=arm_mode)
         
     
     @staticmethod
@@ -222,7 +223,7 @@ class MekUnit:
         del root_data[self.PARENT_BKEY]
         return root, root_data
     
-    def link_all(self,mode='ARMATURE_AUTO'):
+    def link_all(self,mode='auto'):
         """
         Links all bones together. Links are defined in the 
         metadata.
@@ -236,7 +237,9 @@ class MekUnit:
         
         bpy.context.view_layer.objects.active = arm
         arm.select_set(True)
-        bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+        
+        mode = MekUnit.ARMATURE_MODES[mode] # map mode to correct key
+        bpy.ops.object.parent_set(type=mode)
         #bpy.ops.object.parent_set(type='ARMATURE_ENVELOPE')
         
     def create_animation(self,animation_data,name=None,loop=True):
