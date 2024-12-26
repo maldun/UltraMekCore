@@ -20,7 +20,8 @@ class MekUnit:
     #FIX_KEY = "fixations"
     TYPE_KEY = "type"
     NAME_KEY = "name"
-    GENERAL_KEYS = {NAME_KEY,TYPE_KEY}
+    SCALE_KEY = "scale_factors"
+    GENERAL_KEYS = {NAME_KEY,TYPE_KEY,SCALE_KEY}
     # Keys related to positining
     CONNECTIONS_POSKEY = "connections"
     JOINTS_POSKEY = "joints"
@@ -80,6 +81,8 @@ class MekUnit:
         # link everything together
         arm_mode = getattr(self,MekUnit.ARMATURE_MODE_KEYW)
         self.link_all(mode=arm_mode)
+        # post scale
+        self.post_scale(data[self.SCALE_KEY])
         
     
     @staticmethod
@@ -241,6 +244,18 @@ class MekUnit:
         mode = MekUnit.ARMATURE_MODES[mode] # map mode to correct key
         bpy.ops.object.parent_set(type=mode)
         #bpy.ops.object.parent_set(type='ARMATURE_ENVELOPE')
+    
+    
+    def post_scale(self,scale_factors):
+        """
+        Scales the figure according to the defined scaling from the data
+        """
+        skel = self.skeleton
+        arm = skel.get_armature()
+        bpy.context.view_layer.objects.active = arm
+        arm.select_set(True)
+        
+        arm.scale = mathutils.Vector(scale_factors)
         
     def create_animation(self,animation_data,name=None,loop=True):
         """

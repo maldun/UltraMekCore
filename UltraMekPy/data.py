@@ -301,7 +301,7 @@ class UnitHandler:
                 new_path = os.path.join(entity_path,new_fname)
                 if not os.path.exists(new_path):
                     shutil.copy2(fname,new_path)
-                new_anim_data[key] = os.path.join(self.UNITS_PATH,self.GFX_PATH,category,new_fname)
+                new_anim_data[key] = os.path.join(self.UNITS_PATH,self.GFX_PATH,category,name,new_fname)
             new_anim_data = {self.DEFAULT_CAMEO_KEY:new_anim_data}
             new_gfx_file[self.GFX_3D_ANIMATION_KEY] = new_anim_data
             with open(entity_gfx_file,'w',encoding=U8) as fp:
